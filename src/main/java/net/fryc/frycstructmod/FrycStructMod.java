@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FrycStructMod implements ModInitializer {
+
 	public static final String MOD_ID = "frycstructmod";
 
 	// This logger is used to write text to the console and the log file.
