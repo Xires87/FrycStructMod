@@ -4,7 +4,9 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"StructureStartMixin",
-		"ServerPlayerEntityMixin"
+		"ServerPlayerEntityMixin",
+		"BlockMixin",
+		"BlockItemMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

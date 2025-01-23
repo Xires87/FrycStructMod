@@ -1,0 +1,24 @@
+package net.fryc.frycstructmod.mixin;
+
+import net.fryc.frycstructmod.blocks.ModProperties;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemPlacementContext;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+
+@Mixin(BlockItem.class)
+abstract class BlockItemMixin {
+
+
+
+    @ModifyVariable(method = "getPlacementState(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/block/BlockState;", at = @At("STORE"), ordinal = 0)
+    private BlockState modifyPlacedByPlayerProperty(BlockState blockState, ItemPlacementContext context) {
+        if(context.getPlayer() != null){
+            return blockState.withIfExists(ModProperties.PLACED_BY_PLAYER, true);
+        }
+        return blockState;
+    }
+
+}
