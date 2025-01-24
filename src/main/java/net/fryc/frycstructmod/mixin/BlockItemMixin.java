@@ -1,6 +1,6 @@
 package net.fryc.frycstructmod.mixin;
 
-import net.fryc.frycstructmod.blocks.ModProperties;
+import net.fryc.frycstructmod.util.ModProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
@@ -12,10 +12,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 abstract class BlockItemMixin {
 
 
-
-    @ModifyVariable(method = "getPlacementState(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/block/BlockState;", at = @At("STORE"), ordinal = 0)
+    @ModifyVariable(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;", at = @At("STORE"), ordinal = 0)
     private BlockState modifyPlacedByPlayerProperty(BlockState blockState, ItemPlacementContext context) {
-        if(context.getPlayer() != null){
+        if(context.getPlayer() != null && blockState != null){
             return blockState.withIfExists(ModProperties.PLACED_BY_PLAYER, true);
         }
         return blockState;

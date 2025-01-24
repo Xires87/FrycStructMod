@@ -1,20 +1,33 @@
 package net.fryc.frycstructmod.mixin;
 
 
-import net.fryc.frycstructmod.blocks.ModProperties;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import net.fabricmc.fabric.api.block.v1.FabricBlock;
+import net.fryc.frycstructmod.util.ModProperties;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.Property;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+
 @Mixin(Block.class)
-abstract class BlockMixin {
+abstract class BlockMixin extends AbstractBlock implements ItemConvertible, FabricBlock {
+
+    @Shadow
+    protected @Final StateManager<Block, BlockState> stateManager;
+
+    public BlockMixin(AbstractBlock.Settings settings) {
+        super(settings);
+    }
 
     @Shadow
     protected abstract @Final void setDefaultState(BlockState state);
@@ -23,16 +36,31 @@ abstract class BlockMixin {
     public abstract @Final BlockState getDefaultState();
 
 
+    @ModifyVariable(method = {"<init>"}, at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/state/StateManager$Builder;build(Ljava/util/function/Function;Lnet/minecraft/state/StateManager$Factory;)Lnet/minecraft/state/StateManager;"
+    ))
+    private StateManager.Builder<Block, BlockState> addPlacedByPlayerProperty(StateManager.Builder<Block, BlockState> builder) {
+        if(builder != null){
+            if(builder.build(Block::getDefaultState, BlockState::new).getProperties().size() < ModProperties.BLOCK_PROPERTIES_CAP){
+                builder.add(new Property[]{ModProperties.PLACED_BY_PLAYER});
+            }
+        }
+        return builder;
+    }
+
+
+
     @Inject(method = "<init>(Lnet/minecraft/block/AbstractBlock$Settings;)V", at = @At("TAIL"))
     private void setPlacedByPlayerPropertyDefaultValue(AbstractBlock.Settings settings, CallbackInfo info) {
-        this.setDefaultState(this.getDefaultState().withIfExists(ModProperties.PLACED_BY_PLAYER, false));
+        this.setDefaultState(this.stateManager.getDefaultState().withIfExists(ModProperties.PLACED_BY_PLAYER, false));
     }
 
 
-    @Inject(method = "appendProperties(Lnet/minecraft/state/StateManager$Builder;)V", at = @At("HEAD"))
-    private void addPlacedByPlayerProperty(StateManager.Builder<Block, BlockState> builder, CallbackInfo info) {
-        builder.add(ModProperties.PLACED_BY_PLAYER);
-        // TODO dodac jakos ten property do WSZYSTKICH blokow (appendProperties jest overridowane w wielu blokach, a w konstruktorze chyba nie moge zmieniac localsow)
+    @ModifyReturnValue(method = "getDefaultState()Lnet/minecraft/block/BlockState;", at = @At("RETURN"))
+    private BlockState setPlacedByPlayerPropertyDefaultValueOnGetter(BlockState original) {
+        return original.withIfExists(ModProperties.PLACED_BY_PLAYER, false);
     }
+
 
 }

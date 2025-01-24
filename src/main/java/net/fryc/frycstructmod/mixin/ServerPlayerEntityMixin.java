@@ -39,7 +39,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity {
                     StructureStart start = world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
                     if(start != StructureStart.DEFAULT){
                         if(((HasRestrictions) (Object) start).hasActiveRestrictions()){
-                            this.sendMessage(Text.of("Weszlem do struktury"));
+                            this.sendMessage(Text.of("Weszlem do struktury"));// TODO zaczac dawac te restrykcje na struktury
                             ((HasRestrictions) (Object) start).setRestrictions(false);
                         }
                     }
