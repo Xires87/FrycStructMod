@@ -17,6 +17,9 @@
 	"entrypoints": {
 		"main": [
 			"net.fryc.frycstructmod.FrycStructMod"
+		],
+		"client": [
+			"net.fryc.frycstructmod.FrycStructModClient"
 		]
 	},
 	"mixins": [

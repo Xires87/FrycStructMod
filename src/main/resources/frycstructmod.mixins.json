@@ -6,7 +6,9 @@
 		"StructureStartMixin",
 		"ServerPlayerEntityMixin",
 		"BlockMixin",
-		"BlockItemMixin"
+		"BlockItemMixin",
+		"PlayerEntityMixin",
+		"ServerPlayerEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
