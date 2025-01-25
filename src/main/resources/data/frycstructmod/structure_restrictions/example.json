@@ -5,12 +5,12 @@
     "except": [
       "minecraft:oak_log"
     ],
-    "always_allow_when_placed_by_player": true
+    "always_allow_when_placed_by_player": false
   },
   "placing": {
-    "allow": true,
+    "allow": false,
     "except": [
-
+      "minecraft:oak_log"
     ]
   }
 }

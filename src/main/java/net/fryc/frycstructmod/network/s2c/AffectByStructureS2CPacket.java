@@ -1,7 +1,7 @@
 package net.fryc.frycstructmod.network.s2c;
 
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fryc.frycstructmod.util.CanBeAffectedByStructure;
+import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;

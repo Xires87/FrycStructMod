@@ -1,4 +1,4 @@
-package net.fryc.frycstructmod.util;
+package net.fryc.frycstructmod.util.interfaces;
 
 public interface HasRestrictions {
 

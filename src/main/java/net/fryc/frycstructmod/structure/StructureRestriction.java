@@ -1,6 +1,10 @@
 package net.fryc.frycstructmod.structure;
 
+import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemUsageContext;
 
 import java.util.Set;
 
@@ -26,6 +30,20 @@ public class StructureRestriction {
     }
 
 
+    public float modifyBlockBreakingSpeedWhenNeeded(float originalSpeed, BlockState block, PlayerEntity playerEntity){
+        if(this.isMiningAllowedWhenBlockIsPlacedByPlayer() && RestrictionsHelper.isPlacedByPlayer(block)){
+            return originalSpeed;
+        }
+        else if(this.isMiningAllowed() == this.getMiningExcludedBlocks().contains(block.getBlock())){
+            return originalSpeed * 0.00027F;
+        }
+
+        return originalSpeed;
+    }
+
+    public boolean canBePlaced(BlockState block, ItemUsageContext context){
+        return this.isPlacingAllowed() != this.getPlacingExcludedBlocks().contains(block.getBlock());
+    }
 
 
 

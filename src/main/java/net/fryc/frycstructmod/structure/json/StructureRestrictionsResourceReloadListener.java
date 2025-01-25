@@ -32,7 +32,9 @@ public class StructureRestrictionsResourceReloadListener implements SimpleSynchr
         for(Identifier id : manager.findResources(STRUCTURE_RESTRICTIONS_PATH, path -> path.getPath().endsWith(".json")).keySet()) {
             try(InputStream stream = manager.getResource(id).get().getInputStream()) {
                 JsonObject jsonObject = JsonParser.parseString(new String(stream.readAllBytes())).getAsJsonObject();
-
+                //String restrictionType = JsonHelper.getString(jsonObject, "restrictionType");
+                //RegisteredRestrictions.RESTRICTION_TYPES.get(restrictionType).loadFromJson(jsonObject);
+                // TODO to ponizej w osobnej metodzie (loadFromJson)
                 String identifier = JsonHelper.getString(jsonObject, "structure_id");
                 JsonObject miningObject = JsonHelper.getObject(jsonObject, "mining");
                 JsonObject placingObject = JsonHelper.getObject(jsonObject, "placing");

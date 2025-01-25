@@ -1,7 +1,7 @@
 package net.fryc.frycstructmod.mixin;
 
 
-import net.fryc.frycstructmod.util.HasRestrictions;
+import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.structure.StructureStart;
 import org.spongepowered.asm.mixin.Mixin;
 
