@@ -7,4 +7,6 @@ public interface CanBeAffectedByStructure {
 
     void setAffectedByStructure(String affected);
 
+    String getStructureId();
+
 }

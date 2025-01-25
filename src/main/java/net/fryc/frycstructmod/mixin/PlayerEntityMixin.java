@@ -39,4 +39,8 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
     public void setAffectedByStructure(String affected) {
         this.affectedByStructure = affected;
     }
+
+    public String getStructureId(){
+        return this.affectedByStructure;
+    }
 }

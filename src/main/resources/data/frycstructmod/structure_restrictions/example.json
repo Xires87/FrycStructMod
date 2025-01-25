@@ -1,0 +1,16 @@
+{
+  "structure_id": "minecraft:village_plains",
+  "mining": {
+    "allow": false,
+    "except": [
+      "minecraft:oak_log"
+    ],
+    "always_allow_when_placed_by_player": true
+  },
+  "placing": {
+    "allow": true,
+    "except": [
+
+    ]
+  }
+}
