@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedByStructure {
 
 
-    private boolean affectedByStructure = false;
+    private String affectedByStructure = "";
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -27,16 +27,16 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
         if(RestrictionsHelper.shouldModifyBlockBreakingSpeed(this, block)){
-            return original * 0.01F;
+            return RestrictionsHelper.modifyBlockBreakingSpeed(original);
         }
         return original;
     }
 
     public boolean isAffectedByStructure() {
-        return this.affectedByStructure;
+        return !this.affectedByStructure.isEmpty();
     }
 
-    public void setAffectedByStructure(boolean affected) {
+    public void setAffectedByStructure(String affected) {
         this.affectedByStructure = affected;
     }
 }

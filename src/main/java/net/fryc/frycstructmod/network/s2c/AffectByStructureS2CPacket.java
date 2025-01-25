@@ -12,7 +12,7 @@ public class AffectByStructureS2CPacket {
     public static void receive(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender){
         ClientPlayerEntity player = client.player;
         if(player != null){
-            ((CanBeAffectedByStructure) player).setAffectedByStructure(buf.readBoolean());
+            ((CanBeAffectedByStructure) player).setAffectedByStructure(buf.readString());
         }
     }
 }

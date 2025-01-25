@@ -5,6 +5,6 @@ public interface CanBeAffectedByStructure {
 
     boolean isAffectedByStructure();
 
-    void setAffectedByStructure(boolean affected);
+    void setAffectedByStructure(String affected);
 
 }

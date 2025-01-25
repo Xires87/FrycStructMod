@@ -4,15 +4,18 @@ import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.util.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.HasRestrictions;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
@@ -50,10 +53,15 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                     StructureStart start = world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
                     if(((HasRestrictions) (Object) start).hasActiveRestrictions()){
                         if(start != this.currentStructure) {
-                            this.currentStructure = start;
-                            this.setAffectedByStructure(true);
-                            this.sendMessage(Text.of("Weszlem do struktury"));// TODO zaczac dawac te restrykcje na struktury
-                            //((HasRestrictions) (Object) start).setRestrictions(false);
+                            Identifier id = this.getWorld().getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
+                            if(id != null){
+                                this.currentStructure = start;
+                                this.setAffectedByStructure(id.toString());
+                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO zaczac dawac te restrykcje na struktury
+                            }
+                            else {
+                                FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
+                            }
                         }
                     }
                     else this.resetCurrentStructureWhenNeeded();
@@ -73,7 +81,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
         if(this.currentStructure != null){
             this.sendMessage(Text.of("Wychodze"));
             this.currentStructure = null;
-            this.setAffectedByStructure(false);
+            this.setAffectedByStructure("");
         }
     }
 
@@ -82,9 +90,9 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
         return this.currentStructure != null;
     }
 
-    public void setAffectedByStructure(boolean affected) {
+    public void setAffectedByStructure(String affected) {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeBoolean(affected);
+        buf.writeString(affected);
         ServerPlayNetworking.send(((ServerPlayerEntity) (Object) this), ModPackets.AFFECT_BY_STRUCTURE, buf);
     }
 }
