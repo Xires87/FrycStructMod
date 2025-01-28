@@ -1,4 +1,5 @@
 {
+  "type": "default",
   "structure_id": "minecraft:village_plains",
   "mining": {
     "allow": false,
@@ -11,6 +12,16 @@
     "allow": false,
     "except": [
       "minecraft:oak_log"
+    ]
+  },
+  "source": {
+    "power": 10,
+    "entries": [
+      {
+        "type": "blockstate",
+        "block": "minecraft:oak_log",
+        "strength": 1
+      }
     ]
   }
 }

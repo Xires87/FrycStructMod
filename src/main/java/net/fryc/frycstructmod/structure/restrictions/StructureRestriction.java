@@ -1,5 +1,6 @@
-package net.fryc.frycstructmod.structure;
+package net.fryc.frycstructmod.structure.restrictions;
 
+import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -16,10 +17,11 @@ public class StructureRestriction {
     private final boolean allowPlacing;
     private final Set<Block> miningExcludedBlocks;
     private final Set<Block> placingExcludedBlocks;
+    private final RestrictionSource restrictionSource;
 
 
     public StructureRestriction(String structureId, boolean allowMining, boolean allowMiningPlayerBlocks, Set<Block> miningExcludedBlocks,
-                                boolean allowPlacing, Set<Block> placingExcludedBlocks){
+                                boolean allowPlacing, Set<Block> placingExcludedBlocks, RestrictionSource restrictionSource){
 
         this.structureId = structureId;
         this.allowMining = allowMining;
@@ -27,6 +29,7 @@ public class StructureRestriction {
         this.miningExcludedBlocks = miningExcludedBlocks;
         this.allowPlacing = allowPlacing;
         this.placingExcludedBlocks = placingExcludedBlocks;
+        this.restrictionSource = restrictionSource;
     }
 
 
@@ -44,6 +47,8 @@ public class StructureRestriction {
     public boolean canBePlaced(BlockState block, ItemUsageContext context){
         return this.isPlacingAllowed() != this.getPlacingExcludedBlocks().contains(block.getBlock());
     }
+
+
 
 
 
@@ -69,5 +74,9 @@ public class StructureRestriction {
 
     public Set<Block> getPlacingExcludedBlocks() {
         return this.placingExcludedBlocks;
+    }
+
+    public RestrictionSource getRestrictionSource(){
+        return this.restrictionSource;
     }
 }

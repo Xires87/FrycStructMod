@@ -1,9 +1,9 @@
 package net.fryc.frycstructmod.mixin;
 
-import net.fryc.frycstructmod.structure.RegisteredRestrictions;
-import net.fryc.frycstructmod.structure.StructureRestriction;
-import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
+import net.fryc.frycstructmod.structure.restrictions.RestrictionRegistries;
+import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
 import net.fryc.frycstructmod.util.ModProperties;
+import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -40,7 +40,7 @@ abstract class BlockItemMixin {
         PlayerEntity player = context.getPlayer();
         if(player != null){
             if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-                StructureRestriction restriction = RegisteredRestrictions.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
+                StructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
                 if(restriction != null){
                     ItemPlacementContext itemPlacementContext = this.getPlacementContext(context);
                     if(itemPlacementContext != null){

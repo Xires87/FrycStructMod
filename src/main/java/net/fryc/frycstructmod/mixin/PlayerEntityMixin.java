@@ -1,8 +1,8 @@
 package net.fryc.frycstructmod.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import net.fryc.frycstructmod.structure.RegisteredRestrictions;
-import net.fryc.frycstructmod.structure.StructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.RestrictionRegistries;
+import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(PlayerEntity.class)
 abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedByStructure {
 
-
     private String affectedByStructure = "";
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
@@ -27,7 +26,7 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
         if(this.isAffectedByStructure()){
-            StructureRestriction restriction = RegisteredRestrictions.STRUCTURE_RESTRICTIONS.get(this.getStructureId());
+            StructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(this.getStructureId());
             if(restriction != null){
                 return restriction.modifyBlockBreakingSpeedWhenNeeded(original, block, ((PlayerEntity)(Object)this));
             }

@@ -3,13 +3,21 @@ package net.fryc.frycstructmod.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fabricmc.fabric.api.block.v1.FabricBlock;
+import net.fryc.frycstructmod.structure.restrictions.RestrictionRegistries;
+import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.ModProperties;
+import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemConvertible;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,7 +33,7 @@ abstract class BlockMixin extends AbstractBlock implements ItemConvertible, Fabr
     @Shadow
     protected @Final StateManager<Block, BlockState> stateManager;
 
-    public BlockMixin(AbstractBlock.Settings settings) {
+    public BlockMixin(Settings settings) {
         super(settings);
     }
 
@@ -52,7 +60,7 @@ abstract class BlockMixin extends AbstractBlock implements ItemConvertible, Fabr
 
 
     @Inject(method = "<init>(Lnet/minecraft/block/AbstractBlock$Settings;)V", at = @At("TAIL"))
-    private void setPlacedByPlayerPropertyDefaultValue(AbstractBlock.Settings settings, CallbackInfo info) {
+    private void setPlacedByPlayerPropertyDefaultValue(Settings settings, CallbackInfo info) {
         this.setDefaultState(this.stateManager.getDefaultState().withIfExists(ModProperties.PLACED_BY_PLAYER, false));
     }
 
@@ -60,6 +68,23 @@ abstract class BlockMixin extends AbstractBlock implements ItemConvertible, Fabr
     @ModifyReturnValue(method = "getDefaultState()Lnet/minecraft/block/BlockState;", at = @At("RETURN"))
     private BlockState setPlacedByPlayerPropertyDefaultValueOnGetter(BlockState original) {
         return original.withIfExists(ModProperties.PLACED_BY_PLAYER, false);
+    }
+
+    @Inject(method = "onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)V", at = @At("HEAD"))
+    public void onBlockBreak(World world, BlockPos pos, BlockState state, PlayerEntity player, CallbackInfo info) {
+        if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
+            StructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
+            if(restriction != null){
+                restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
+                    return entry.getEntryClass().equals(state.getClass());
+                }).forEach(entry -> {
+                    if(((SourceEntry<BlockState>) entry).affectOwner(state)){
+                        // TODO dac wiecej tych duszkow i zrobic losowanie pozycji
+                        player.getWorld().addParticle(ParticleTypes.SOUL, true, pos.getX(), pos.getY(), pos.getZ(), 0d, 5d, 0d);
+                    };
+                });
+            }
+        }
     }
 
 

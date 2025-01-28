@@ -57,7 +57,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                             if(id != null){
                                 this.currentStructure = start;
                                 this.setAffectedByStructureServerAndClient(id.toString());
-                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO zaczac dawac te restrykcje na struktury
+                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO zrobic wylaczanie zrodla jak sie wyczerpie
                             }
                             else {
                                 FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
