@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class RestrictionSource {
 
-    private int power;
+    private final int power;
 
     private final Set<SourceEntry<?>> entries;
 
@@ -30,9 +30,9 @@ public class RestrictionSource {
         return this.power;
     }
 
-    public void decreasePower(int amount){
-        this.power -= amount;
-    }
+    //public void decreasePower(int amount){
+    //    this.power -= amount;
+    //}
 
 
 

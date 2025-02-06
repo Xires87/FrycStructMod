@@ -1,0 +1,34 @@
+package net.fryc.frycstructmod.structure.restrictions;
+
+public class StructureRestrictionInstance {
+
+    private final StructureRestriction structureRestriction;
+    private int currentPower;
+
+    public StructureRestrictionInstance(StructureRestriction structureRestriction){
+        this.structureRestriction = structureRestriction;
+        this.currentPower = structureRestriction.getRestrictionSource().getPower();
+    }
+
+
+    public StructureRestriction getStructureRestriction(){
+        return this.structureRestriction;
+    }
+
+    public int getCurrentPower(){
+        return this.currentPower;
+    }
+
+    public void setCurrentPower(int power){
+        this.currentPower = power;
+    }
+
+    /**
+     *  Returns true when currentPower is lower than 1 after subtraction
+     */
+    public boolean decreaseCurrentPower(int power){
+        this.currentPower -= power;
+
+        return this.currentPower < 1;
+    }
+}

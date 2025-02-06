@@ -8,6 +8,7 @@ import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
+import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKeys;
@@ -28,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Map;
 
 @Mixin(ServerPlayerEntity.class)
-abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffectedByStructure {
+abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffectedByStructure, HoldsStructureStart {
 
     @Nullable
     private StructureStart currentStructure = null;
@@ -51,13 +52,18 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                     return world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure) != StructureStart.DEFAULT;
                 }).findFirst().ifPresentOrElse(structure -> {
                     StructureStart start = world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
-                    if(((HasRestrictions) (Object) start).hasActiveRestrictions()){
+                    HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
+                    if(startWithRestrictions.hasActiveRestrictions()){
+                        if(startWithRestrictions.getStructureRestrictionInstance() == null){
+                            startWithRestrictions.createStructureRestrictionInstance(world.getRegistryManager());
+                        }
+
                         if(start != this.currentStructure) {
-                            Identifier id = this.getWorld().getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
+                            Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
                             if(id != null){
                                 this.currentStructure = start;
                                 this.setAffectedByStructureServerAndClient(id.toString());
-                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO zrobic wylaczanie zrodla jak sie wyczerpie
+                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies powiadomienie ze jestes na terenie struktury
                             }
                             else {
                                 FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
@@ -90,5 +96,9 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString(affected);
         ServerPlayNetworking.send(((ServerPlayerEntity) (Object) this), ModPackets.AFFECT_BY_STRUCTURE, buf);
+    }
+
+    public StructureStart getStructureStart(){
+        return this.currentStructure;
     }
 }

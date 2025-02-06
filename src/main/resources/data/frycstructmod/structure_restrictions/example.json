@@ -20,7 +20,7 @@
       {
         "type": "blockstate",
         "block": "minecraft:oak_log",
-        "strength": 1
+        "strength": 10
       }
     ]
   }
