@@ -18,7 +18,6 @@ public class StructureRestriction {
     private final Set<Block> miningExcludedBlocks;
     private final Set<Block> placingExcludedBlocks;
     private final RestrictionSource restrictionSource;
-// TODO RestrictionSource powinno byc zapisane w StructureStart zeby obnizanie mocy wplywalo na 1 strukture a nie na wszystkie (chyba zrobie StructureRestrictionInstance
 
     public StructureRestriction(String structureId, boolean allowMining, boolean allowMiningPlayerBlocks, Set<Block> miningExcludedBlocks,
                                 boolean allowPlacing, Set<Block> placingExcludedBlocks, RestrictionSource restrictionSource){
