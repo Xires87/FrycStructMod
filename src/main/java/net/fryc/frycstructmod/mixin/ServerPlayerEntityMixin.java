@@ -85,6 +85,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
 
     private void resetCurrentStructureWhenNeeded(){
         if(this.currentStructure != null){
+            this.getWorld().getChunk(this.currentStructure.getPos().x, this.currentStructure.getPos().z).setNeedsSaving(true);
             this.sendMessage(Text.of("Wychodze"));
             this.currentStructure = null;
             this.setAffectedByStructureServerAndClient("");

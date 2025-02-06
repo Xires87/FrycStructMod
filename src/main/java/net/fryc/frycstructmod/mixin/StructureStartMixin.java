@@ -2,7 +2,6 @@ package net.fryc.frycstructmod.mixin;
 
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.structure.restrictions.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
@@ -37,7 +36,6 @@ abstract class StructureStartMixin implements HasRestrictions {
         }
     }
 
-    // TODO zapisywanie do nbt nie dziala
     @ModifyReturnValue(method = "toNbt(Lnet/minecraft/structure/StructureContext;Lnet/minecraft/util/math/ChunkPos;)Lnet/minecraft/nbt/NbtCompound;", at = @At("RETURN"))
     private NbtCompound saveRestrictionsActiveToNbt(NbtCompound original, StructureContext context, ChunkPos chunkPos) {
         if(original.contains("Children")){
@@ -50,7 +48,7 @@ abstract class StructureStartMixin implements HasRestrictions {
     }
 
     @ModifyReturnValue(method = "fromNbt(Lnet/minecraft/structure/StructureContext;Lnet/minecraft/nbt/NbtCompound;J)Lnet/minecraft/structure/StructureStart;", at = @At("RETURN"))
-    private static StructureStart fromNbt(StructureStart original, StructureContext context, NbtCompound nbt, long seed) {
+    private static StructureStart loadRestrictionsActiveFromNbt(StructureStart original, StructureContext context, NbtCompound nbt, long seed) {
         if(nbt.contains("structureRestrictionActive")){
             if(original != null){
                 if(!original.equals(StructureStart.DEFAULT)){
@@ -60,7 +58,6 @@ abstract class StructureStartMixin implements HasRestrictions {
                     str.setActiveRestrictions(active);
                     if(active){
                         if(nbt.contains("structureRestrictionInstancePower")){
-                            FrycStructMod.LOGGER.warn("Ma pauera");
                             str.createStructureRestrictionInstance(context.registryManager());
                             if(str.getStructureRestrictionInstance() != null){
                                 str.getStructureRestrictionInstance().setCurrentPower(nbt.getInt("structureRestrictionInstancePower"));

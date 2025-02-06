@@ -15,6 +15,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
@@ -80,7 +81,7 @@ abstract class BlockMixin extends AbstractBlock implements ItemConvertible, Fabr
                     restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
                         return entry.getEntryClass().equals(state.getClass());
                     }).forEach(entry -> {
-                        if(((SourceEntry<BlockState>) entry).affectOwner(((HoldsStructureStart) player).getStructureStart(), state)){
+                        if(((SourceEntry<BlockState>) entry).affectOwner((ServerWorld) world, ((HoldsStructureStart) player).getStructureStart(), state)){
                             // TODO dac wiecej tych duszkow i zrobic losowanie pozycji (i networking do nich trzeba bo to na serwerze jest odpalane)
                             player.getWorld().addParticle(ParticleTypes.SOUL, true, pos.getX(), pos.getY(), pos.getZ(), 0d, 5d, 0d);
                         };
