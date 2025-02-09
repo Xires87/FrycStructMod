@@ -1,32 +1,20 @@
-package net.fryc.frycstructmod.structure.restrictions;
+package net.fryc.frycstructmod.structure.restrictions.registry;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fryc.frycstructmod.FrycStructMod;
+import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.sources.BlockStateSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
-import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.FrycJsonHelper;
 import net.minecraft.block.Block;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 
-import java.util.HashMap;
-
-public class RestrictionRegistries {
-
-    // TODO zabezpieczyc te mapy (dac ochrone przed podwojna rejestracja itd)
-
-    public static final HashMap<String, StructureRestriction> STRUCTURE_RESTRICTIONS = new HashMap<>();
-
-    public static final HashMap<String, RestrictionTypeLoader> RESTRICTION_TYPES = new HashMap<>();
-
-    public static final HashMap<String, SourceEntryLoader> SOURCE_ENTRY_TYPES = new HashMap<>();
-
-
+public class FrycStructRestrictions {
 
     public static void registerRestrictionTypes(){
         RestrictionRegistries.RESTRICTION_TYPES.put("default", (jsonObject, id) -> {
@@ -70,7 +58,7 @@ public class RestrictionRegistries {
     }
 
     public static void registerSourceEntryTypes(){
-        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("blockstate", (jsonObject, id) -> {
+        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("block", (jsonObject, id) -> {
             String stringId = JsonHelper.getString(jsonObject, "block");
             int sourceStrength = JsonHelper.getInt(jsonObject, "strength");
             Identifier blockId = Registries.BLOCK.getIds().stream().filter(identifier -> {
@@ -79,17 +67,5 @@ public class RestrictionRegistries {
 
             return new BlockStateSourceEntry(blockId, sourceStrength);
         });
-    }
-
-
-    @FunctionalInterface
-    public interface SourceEntryLoader {
-        SourceEntry<?> loadFromJson(JsonObject jsonObject, Identifier id);
-    }
-
-
-    @FunctionalInterface
-    public interface RestrictionTypeLoader {
-        void loadFromJson(JsonObject jsonObject, Identifier id);
     }
 }

@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.fryc.frycstructmod.FrycStructMod;
-import net.fryc.frycstructmod.structure.restrictions.RestrictionRegistries;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;

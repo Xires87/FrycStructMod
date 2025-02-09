@@ -3,7 +3,7 @@ package net.fryc.frycstructmod.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fabricmc.fabric.api.block.v1.FabricBlock;
-import net.fryc.frycstructmod.structure.restrictions.RestrictionRegistries;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.ModProperties;
@@ -84,7 +84,7 @@ abstract class BlockMixin extends AbstractBlock implements ItemConvertible, Fabr
                         if(((SourceEntry<BlockState>) entry).affectOwner((ServerWorld) world, ((HoldsStructureStart) player).getStructureStart(), state)){
                             // TODO dac wiecej tych duszkow i zrobic losowanie pozycji (i networking do nich trzeba bo to na serwerze jest odpalane)
                             player.getWorld().addParticle(ParticleTypes.SOUL, true, pos.getX(), pos.getY(), pos.getZ(), 0d, 5d, 0d);
-                        };
+                        }
                     });
                 }
             }
