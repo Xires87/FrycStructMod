@@ -2,9 +2,8 @@ package net.fryc.frycstructmod;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fryc.frycstructmod.structure.restrictions.registry.FrycStructRestrictions;
-import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.json.StructureRestrictionsResourceReloadListener;
+import net.fryc.frycstructmod.structure.restrictions.registry.FrycStructRestrictions;
 import net.minecraft.resource.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

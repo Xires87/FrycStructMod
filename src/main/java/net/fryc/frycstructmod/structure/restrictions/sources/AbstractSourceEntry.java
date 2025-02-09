@@ -10,7 +10,7 @@ public abstract class AbstractSourceEntry<T> implements SourceEntry<T> {
 
     protected final Identifier sourceId;
 
-    protected AbstractSourceEntry(Identifier sourceId, int sourceStrength){
+    public AbstractSourceEntry(Identifier sourceId, int sourceStrength){
         this.sourceId = sourceId;
         this.sourceStrength = sourceStrength;
     }

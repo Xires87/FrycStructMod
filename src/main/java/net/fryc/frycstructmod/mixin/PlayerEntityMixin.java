@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
-import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;

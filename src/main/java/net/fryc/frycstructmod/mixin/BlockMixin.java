@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fabricmc.fabric.api.block.v1.FabricBlock;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.ModProperties;
-import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

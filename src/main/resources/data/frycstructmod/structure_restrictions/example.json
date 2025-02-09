@@ -18,9 +18,9 @@
     "power": 10,
     "entries": [
       {
-        "type": "block",
-        "block": "minecraft:oak_log",
-        "strength": 3
+        "type": "persistentMob",
+        "entry_id": "minecraft:iron_golem",
+        "strength": 1
       }
     ]
   }

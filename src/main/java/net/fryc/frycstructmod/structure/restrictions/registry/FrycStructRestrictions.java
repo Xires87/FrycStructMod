@@ -7,6 +7,8 @@ import com.google.gson.JsonObject;
 import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.sources.BlockStateSourceEntry;
+import net.fryc.frycstructmod.structure.restrictions.sources.LivingEntitySourceEntry;
+import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
 import net.fryc.frycstructmod.util.FrycJsonHelper;
 import net.minecraft.block.Block;
@@ -57,16 +59,36 @@ public class FrycStructRestrictions {
 
     }
 
-    // TODO dodac wiecej typow (entity, persistentEntity)
+
     public static void registerSourceEntryTypes(){
         RestrictionRegistries.SOURCE_ENTRY_TYPES.put("block", (jsonObject, id) -> {
-            String stringId = JsonHelper.getString(jsonObject, "block");
+            String stringId = JsonHelper.getString(jsonObject, "entry_id");
             int sourceStrength = JsonHelper.getInt(jsonObject, "strength");
             Identifier blockId = Registries.BLOCK.getIds().stream().filter(identifier -> {
                 return identifier.toString().equals(stringId);
             }).findFirst().get();
 
             return new BlockStateSourceEntry(blockId, sourceStrength);
+        });
+
+        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("mob", (jsonObject, id) -> {
+            String stringId = JsonHelper.getString(jsonObject, "entry_id");
+            int sourceStrength = JsonHelper.getInt(jsonObject, "strength");
+            Identifier mobId = Registries.ENTITY_TYPE.getIds().stream().filter(identifier -> {
+                return identifier.toString().equals(stringId);
+            }).findFirst().get();
+
+            return new LivingEntitySourceEntry(mobId, sourceStrength);
+        });
+// TODO zrobic zeby przy wejsciu sprawdzalo czy wszyscy persistent czasem nie zdechli
+        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("persistentMob", (jsonObject, id) -> {
+            String stringId = JsonHelper.getString(jsonObject, "entry_id");
+            int sourceStrength = JsonHelper.getInt(jsonObject, "strength");
+            Identifier mobId = Registries.ENTITY_TYPE.getIds().stream().filter(identifier -> {
+                return identifier.toString().equals(stringId);
+            }).findFirst().get();
+
+            return new PersistentMobSourceEntry(mobId, sourceStrength);
         });
     }
 }
