@@ -3,18 +3,13 @@ package net.fryc.frycstructmod.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fabricmc.fabric.api.block.v1.FabricBlock;
-import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
-import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.ModProperties;
-import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
-import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
+import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemConvertible;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
@@ -74,21 +69,8 @@ abstract class BlockMixin extends AbstractBlock implements ItemConvertible, Fabr
 
     @Inject(method = "onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)V", at = @At("HEAD"))
     public void onBlockBreak(World world, BlockPos pos, BlockState state, PlayerEntity player, CallbackInfo info) {
-        if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-            if(!world.isClient()){
-                StructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
-                if(restriction != null){
-                    restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
-                        return entry.getEntryClass().equals(state.getClass());
-                    }).forEach(entry -> {
-                        if(((SourceEntry<BlockState>) entry).affectOwner((ServerWorld) world, ((HoldsStructureStart) player).getStructureStart(), state)){
-                            // TODO dac wiecej tych duszkow i zrobic losowanie pozycji (i networking do nich trzeba bo to na serwerze jest odpalane)
-                            player.getWorld().addParticle(ParticleTypes.SOUL, true, pos.getX(), pos.getY(), pos.getZ(), 0d, 5d, 0d);
-                        }
-                    });
-                }
-            }
-
+        if(!world.isClient()){
+            RestrictionsHelper.triggerEvent(BlockState.class, state, player, (ServerWorld) world, pos);
         }
     }
 

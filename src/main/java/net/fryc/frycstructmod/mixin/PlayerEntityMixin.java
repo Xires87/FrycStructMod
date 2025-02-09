@@ -1,16 +1,20 @@
 package net.fryc.frycstructmod.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
+import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
 abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedByStructure {
@@ -32,6 +36,11 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
             }
         }
         return original;
+    }
+
+    @Inject(method = "onKilledOther(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/LivingEntity;)Z", at = @At("HEAD"))
+    private void onMobKill(ServerWorld world, LivingEntity killedEntity, CallbackInfoReturnable<Boolean> ret) {
+        RestrictionsHelper.triggerEvent(LivingEntity.class, killedEntity, ((PlayerEntity)(Object)this), world, killedEntity.getBlockPos());
     }
 
     public boolean isAffectedByStructure() {

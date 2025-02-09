@@ -30,11 +30,6 @@ public class RestrictionSource {
         return this.power;
     }
 
-    //public void decreasePower(int amount){
-    //    this.power -= amount;
-    //}
-
-
 
     public static class Builder {
         private final ImmutableSet.Builder<SourceEntry<?>> sourceEntries = ImmutableSet.builder();

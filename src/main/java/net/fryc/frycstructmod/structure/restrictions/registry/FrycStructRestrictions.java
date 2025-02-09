@@ -57,6 +57,7 @@ public class FrycStructRestrictions {
 
     }
 
+    // TODO dodac wiecej typow (entity, persistentEntity)
     public static void registerSourceEntryTypes(){
         RestrictionRegistries.SOURCE_ENTRY_TYPES.put("block", (jsonObject, id) -> {
             String stringId = JsonHelper.getString(jsonObject, "block");
