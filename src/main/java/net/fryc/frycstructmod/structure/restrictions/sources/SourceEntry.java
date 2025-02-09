@@ -1,5 +1,6 @@
 package net.fryc.frycstructmod.structure.restrictions.sources;
 
+import net.fryc.frycstructmod.structure.restrictions.sources.events.Event;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 
@@ -20,7 +21,7 @@ public interface SourceEntry<T> {
         return retValue;
     }
 
-    Class<T> getEntryClass();
+    Event getEvent();
 
 
     void setOwner(RestrictionSource owner);

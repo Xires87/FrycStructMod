@@ -3,6 +3,7 @@ package net.fryc.frycstructmod.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
+import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.BlockState;
@@ -40,7 +41,7 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
 
     @Inject(method = "onKilledOther(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/LivingEntity;)Z", at = @At("HEAD"))
     private void onMobKill(ServerWorld world, LivingEntity killedEntity, CallbackInfoReturnable<Boolean> ret) {
-        RestrictionsHelper.triggerEvent(LivingEntity.class, killedEntity, ((PlayerEntity)(Object)this), world, killedEntity.getBlockPos());
+        SourceEntryEvent.ON_MOB_KILL.triggerEvent(killedEntity, ((PlayerEntity)(Object)this), world, killedEntity.getBlockPos());
     }
 
     public boolean isAffectedByStructure() {

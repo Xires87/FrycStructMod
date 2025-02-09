@@ -1,6 +1,8 @@
 package net.fryc.frycstructmod.structure.restrictions.sources;
 
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
+import net.fryc.frycstructmod.structure.restrictions.sources.events.Event;
+import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.ModProperties;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.block.BlockState;
@@ -40,9 +42,10 @@ public class BlockStateSourceEntry extends AbstractSourceEntry<BlockState> {
         return false;
     }
 
+
     @Override
-    public Class<BlockState> getEntryClass() {
-        return BlockState.class;
+    public Event getEvent() {
+        return SourceEntryEvent.ON_BLOCK_DESTROY;
     }
 
 }

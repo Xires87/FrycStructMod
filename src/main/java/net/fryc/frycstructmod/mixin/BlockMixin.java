@@ -3,6 +3,7 @@ package net.fryc.frycstructmod.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fabricmc.fabric.api.block.v1.FabricBlock;
+import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.ModProperties;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.minecraft.block.AbstractBlock;
@@ -70,7 +71,7 @@ abstract class BlockMixin extends AbstractBlock implements ItemConvertible, Fabr
     @Inject(method = "onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)V", at = @At("HEAD"))
     public void onBlockBreak(World world, BlockPos pos, BlockState state, PlayerEntity player, CallbackInfo info) {
         if(!world.isClient()){
-            RestrictionsHelper.triggerEvent(BlockState.class, state, player, (ServerWorld) world, pos);
+            SourceEntryEvent.ON_BLOCK_DESTROY.triggerEvent(state, player, (ServerWorld) world, pos);
         }
     }
 
