@@ -18,4 +18,12 @@ public abstract class AbstractSourceEntry<T> implements SourceEntry<T> {
     public void setOwner(RestrictionSource owner){
         this.owner = owner;
     }
+
+    public int getSourceStrength(){
+        return this.sourceStrength;
+    }
+
+    public Identifier getSourceId(){
+        return this.sourceId;
+    }
 }

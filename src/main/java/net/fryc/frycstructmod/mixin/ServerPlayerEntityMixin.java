@@ -6,11 +6,15 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.network.ModPackets;
+import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
+import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -63,7 +67,10 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                             if(id != null){
                                 this.currentStructure = start;
                                 this.setAffectedByStructureServerAndClient(id.toString());
-                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies powiadomienie ze jestes na terenie struktury
+                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
+
+                                // checks for persistent entities on enter in case they somehow died (without player's help)
+                                RestrictionsHelper.checkForPersistentEntitiesOnEnter(startWithRestrictions.getStructureRestrictionInstance(), world, start);
                             }
                             else {
                                 FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
