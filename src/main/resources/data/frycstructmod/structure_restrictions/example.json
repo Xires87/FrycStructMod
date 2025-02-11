@@ -12,7 +12,8 @@
     "allow": false,
     "except": [
       "minecraft:oak_log"
-    ]
+    ],
+    "always_disallow_when_indestructible": true
   },
   "source": {
     "power": 10,
@@ -20,6 +21,11 @@
       {
         "type": "persistentMob",
         "entry_id": "minecraft:iron_golem",
+        "strength": 1
+      },
+      {
+        "type": "block",
+        "entry_id": "minecraft:oak_log",
         "strength": 1
       }
     ]

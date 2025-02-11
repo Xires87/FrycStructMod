@@ -1,13 +1,18 @@
 package net.fryc.frycstructmod.util;
 
 
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.util.math.BlockPos;
@@ -25,8 +30,11 @@ public class RestrictionsHelper {
     }
 
     public static void spawnSoulParticlesServerSided(ServerWorld world, BlockPos pos){
-        world.addParticle(ParticleTypes.SOUL, true, pos.getX(), pos.getY(), pos.getZ(), 0d, 5d, 0d);
-        // TODO dac wiecej tych duszkow i zrobic losowanie pozycji (i networking do nich trzeba bo to na serwerze jest odpalane)
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeBlockPos(pos);
+        for (ServerPlayerEntity pl : PlayerLookup.tracking(world, pos)) {
+            ServerPlayNetworking.send(pl, ModPackets.SPAWN_SOUL_PARTICLES, buf);
+        }
     }
 
     public static boolean findPersistentMobInStructure(World world, StructureStart structureStart, EntityType<?> type) {
