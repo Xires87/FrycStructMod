@@ -2,16 +2,16 @@ package net.fryc.frycstructmod.structure.restrictions;
 
 public class StructureRestrictionInstance {
 
-    private final StructureRestriction structureRestriction;
+    private final AbstractStructureRestriction structureRestriction;
     private int currentPower;
 
-    public StructureRestrictionInstance(StructureRestriction structureRestriction){
+    public StructureRestrictionInstance(AbstractStructureRestriction structureRestriction){
         this.structureRestriction = structureRestriction;
         this.currentPower = structureRestriction.getRestrictionSource().getPower();
     }
 
 
-    public StructureRestriction getStructureRestriction(){
+    public AbstractStructureRestriction getStructureRestriction(){
         return this.structureRestriction;
     }
 

@@ -2,8 +2,9 @@ package net.fryc.frycstructmod.mixin;
 
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
-import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.nbt.NbtCompound;
@@ -88,7 +89,7 @@ abstract class StructureStartMixin implements HasRestrictions {
     public void createStructureRestrictionInstance(DynamicRegistryManager manager){
         Identifier id = manager.get(RegistryKeys.STRUCTURE).getId(((StructureStart) (Object) this).getStructure());
         if(id != null){
-            StructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(id.toString());
+            AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(id.toString());
             if(restriction != null){
                 this.structureRestrictionInstance = new StructureRestrictionInstance(restriction);
             }

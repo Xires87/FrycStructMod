@@ -1,7 +1,8 @@
 package net.fryc.frycstructmod.mixin;
 
+import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
-import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.util.ModProperties;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.BlockState;
@@ -40,14 +41,16 @@ abstract class BlockItemMixin {
         PlayerEntity player = context.getPlayer();
         if(player != null){
             if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-                StructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
+                AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
                 if(restriction != null){
-                    ItemPlacementContext itemPlacementContext = this.getPlacementContext(context);
-                    if(itemPlacementContext != null){
-                        BlockState blockState = this.getPlacementState(itemPlacementContext);
-                        if(blockState != null){
-                            if(!restriction.canBePlaced(blockState, itemPlacementContext)){
-                                ret.setReturnValue(ActionResult.FAIL);
+                    if(restriction instanceof DefaultStructureRestriction defRestriction){
+                        ItemPlacementContext itemPlacementContext = this.getPlacementContext(context);
+                        if(itemPlacementContext != null){
+                            BlockState blockState = this.getPlacementState(itemPlacementContext);
+                            if(blockState != null){
+                                if(!defRestriction.canBePlaced(blockState, itemPlacementContext)){
+                                    ret.setReturnValue(ActionResult.FAIL);
+                                }
                             }
                         }
                     }

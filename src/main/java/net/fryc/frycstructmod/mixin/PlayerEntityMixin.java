@@ -1,7 +1,8 @@
 package net.fryc.frycstructmod.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
@@ -30,9 +31,10 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
         if(this.isAffectedByStructure()){
-            StructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(this.getStructureId());
+            AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(this.getStructureId());
             if(restriction != null){
-                return restriction.modifyBlockBreakingSpeedWhenNeeded(original, block, ((PlayerEntity)(Object)this));
+                if(restriction instanceof DefaultStructureRestriction defRestriction)
+                return defRestriction.modifyBlockBreakingSpeedWhenNeeded(original, block, ((PlayerEntity)(Object)this));
             }
         }
         return original;

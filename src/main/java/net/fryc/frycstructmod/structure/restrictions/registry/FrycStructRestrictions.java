@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fryc.frycstructmod.FrycStructMod;
-import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.sources.BlockStateSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.LivingEntitySourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
@@ -31,6 +31,7 @@ public class FrycStructRestrictions {
             ImmutableSet<Block> miningExceptions = FrycJsonHelper.getExcludedBlocks(mineExcept, id);
 
             boolean allowPlacing = JsonHelper.getBoolean(placingObject, "allow", true);
+            boolean disallowPlacingIndestructibleBlocks = JsonHelper.getBoolean(miningObject, "always_disallow_when_indestructible", true);
             ImmutableSet<Block> placingExceptions = FrycJsonHelper.getExcludedBlocks(placeExcept, id);
 
             JsonObject sourceObject = JsonHelper.getObject(jsonObject, "source");
@@ -50,8 +51,9 @@ public class FrycStructRestrictions {
                 }
             }
 
-            RestrictionRegistries.STRUCTURE_RESTRICTIONS.put(identifier, new StructureRestriction(
-                    identifier, allowMining, allowMiningPlayerBlocks, miningExceptions, allowPlacing, placingExceptions, builder.build()
+            RestrictionRegistries.STRUCTURE_RESTRICTIONS.put(identifier, new DefaultStructureRestriction(
+                    identifier, allowMining, allowMiningPlayerBlocks, miningExceptions, allowPlacing,
+                    disallowPlacingIndestructibleBlocks, placingExceptions, builder.build()
             ));
         });
 
@@ -80,7 +82,7 @@ public class FrycStructRestrictions {
 
             return new LivingEntitySourceEntry(mobId, sourceStrength);
         });
-// TODO zrobic zeby przy wejsciu sprawdzalo czy wszyscy persistent czasem nie zdechli
+
         RestrictionRegistries.SOURCE_ENTRY_TYPES.put("persistentMob", (jsonObject, id) -> {
             String stringId = JsonHelper.getString(jsonObject, "entry_id");
             int sourceStrength = JsonHelper.getInt(jsonObject, "strength");

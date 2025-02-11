@@ -1,6 +1,7 @@
 package net.fryc.frycstructmod.structure.restrictions.sources.events;
 
-import net.fryc.frycstructmod.structure.restrictions.StructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
@@ -20,7 +21,7 @@ public class SourceEntryEvent<T> implements Event {
 
     public void triggerEvent(T source, PlayerEntity player, ServerWorld world, BlockPos pos){
         if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-            StructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
+            AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
             if(restriction != null){
                 restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
                     return entry.getEvent().equals(this);
