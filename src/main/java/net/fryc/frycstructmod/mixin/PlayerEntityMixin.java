@@ -26,15 +26,16 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
         super(entityType, world);
     }
 
-
+// TODO zrobic zeby nie zawsze mozna bylo niszczyc instant break bloki
     @ModifyReturnValue(method = "getBlockBreakingSpeed(Lnet/minecraft/block/BlockState;)F", at = @At("RETURN"))
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
         if(this.isAffectedByStructure()){
             AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(this.getStructureId());
             if(restriction != null){
-                if(restriction instanceof DefaultStructureRestriction defRestriction)
-                return defRestriction.modifyBlockBreakingSpeedWhenNeeded(original, block, ((PlayerEntity)(Object)this));
+                if(restriction instanceof DefaultStructureRestriction defRestriction){
+                    return defRestriction.modifyBlockBreakingSpeedWhenNeeded(original, block, ((PlayerEntity)(Object)this));
+                }
             }
         }
         return original;

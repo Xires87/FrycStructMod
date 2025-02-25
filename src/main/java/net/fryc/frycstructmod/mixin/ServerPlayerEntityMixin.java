@@ -1,7 +1,6 @@
 package net.fryc.frycstructmod.mixin;
 
 import com.mojang.authlib.GameProfile;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fryc.frycstructmod.FrycStructMod;
@@ -20,14 +19,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Map;
 
 @Mixin(ServerPlayerEntity.class)
 abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffectedByStructure, HoldsStructureStart {
@@ -46,47 +42,36 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
 
         if(--this.delay < 1){
             ServerWorld world = ((ServerWorld) this.getWorld());
-            if(world.getStructureAccessor().hasStructureReferences(this.getBlockPos())){
-                Map<Structure, LongSet> structureMap = world.getChunk(this.getBlockPos()).getStructureReferences();
+            RestrictionsHelper.executeIfHasStructureOrElse(world, this.getBlockPos(), structure -> {
+                StructureStart start = world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
+                HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
+                if(startWithRestrictions.hasActiveRestrictions()){
+                    if(startWithRestrictions.getStructureRestrictionInstance() == null){
+                        startWithRestrictions.createStructureRestrictionInstance(world.getRegistryManager());
+                    }
 
-                structureMap.keySet().stream().filter(structure -> {
-                    return world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure) != StructureStart.DEFAULT;
-                }).findFirst().ifPresentOrElse(structure -> {
-                    StructureStart start = world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
-                    HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
+                    // second check, because createStructureRestrictionInstance([...]); can disable restrictions
                     if(startWithRestrictions.hasActiveRestrictions()){
-                        if(startWithRestrictions.getStructureRestrictionInstance() == null){
-                            startWithRestrictions.createStructureRestrictionInstance(world.getRegistryManager());
-                        }
+                        if(start != this.currentStructure) {
+                            Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
+                            if(id != null){
+                                this.currentStructure = start;
+                                this.setAffectedByStructureServerAndClient(id.toString());
+                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
 
-                        // second check, because createStructureRestrictionInstance([...]); can disable restrictions
-                        if(startWithRestrictions.hasActiveRestrictions()){
-                            if(start != this.currentStructure) {
-                                Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
-                                if(id != null){
-                                    this.currentStructure = start;
-                                    this.setAffectedByStructureServerAndClient(id.toString());
-                                    this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
-
-                                    // checks for persistent entities on enter in case they somehow died (without player's help)
-                                    RestrictionsHelper.checkForPersistentEntitiesOnEnter(startWithRestrictions.getStructureRestrictionInstance(), world, start);
-                                }
-                                else {
-                                    FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
-                                }
+                                // checks for persistent entities on enter in case they somehow died (without player's help)
+                                RestrictionsHelper.checkForPersistentEntitiesOnEnter(startWithRestrictions.getStructureRestrictionInstance(), world, start);
+                            }
+                            else {
+                                FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
                             }
                         }
                     }
-                    else {
-                        this.resetCurrentStructureWhenNeeded();
-                    }
-                }, this::resetCurrentStructureWhenNeeded);
-
-            }
-            else {
-                this.resetCurrentStructureWhenNeeded();
-            }
-
+                }
+                else {
+                    this.resetCurrentStructureWhenNeeded();
+                }
+            }, this::resetCurrentStructureWhenNeeded);
 
             this.delay = 30;
         }

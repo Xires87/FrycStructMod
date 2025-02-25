@@ -2,6 +2,7 @@ package net.fryc.frycstructmod.structure.restrictions;
 
 public class StructureRestrictionInstance {
 
+    // TODO zrobic to jako liste zeby wiele restrykcji moglo byc aktywnych
     private final AbstractStructureRestriction structureRestriction;
     private int currentPower;
 

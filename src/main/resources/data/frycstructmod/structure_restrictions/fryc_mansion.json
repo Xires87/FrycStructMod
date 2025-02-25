@@ -1,0 +1,24 @@
+{
+  "type": "default",
+  "structure_id": "minecraft:mansion",
+  "mining": {
+    "allow": false,
+    "except": [],
+    "always_allow_when_placed_by_player": false
+  },
+  "placing": {
+    "allow": false,
+    "except": [],
+    "always_disallow_when_indestructible": true
+  },
+  "source": {
+    "power": 10,
+    "entries": [
+      {
+        "type": "persistentMob",
+        "entry_id": "minecraft:evoker",
+        "strength": 1
+      }
+    ]
+  }
+}

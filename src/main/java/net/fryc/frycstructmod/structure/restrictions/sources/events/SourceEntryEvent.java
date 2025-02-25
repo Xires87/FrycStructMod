@@ -1,7 +1,6 @@
 package net.fryc.frycstructmod.structure.restrictions.sources.events;
 
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.RestrictionsHelper;

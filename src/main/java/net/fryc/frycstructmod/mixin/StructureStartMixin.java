@@ -3,9 +3,8 @@ package net.fryc.frycstructmod.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
-import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.DynamicRegistryManager;

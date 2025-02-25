@@ -2,7 +2,6 @@ package net.fryc.frycstructmod.structure.restrictions.registry;
 
 import com.google.gson.JsonObject;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.minecraft.util.Identifier;
 

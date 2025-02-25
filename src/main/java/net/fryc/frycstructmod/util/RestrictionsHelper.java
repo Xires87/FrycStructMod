@@ -1,6 +1,7 @@
 package net.fryc.frycstructmod.util;
 
 
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -18,6 +19,10 @@ import net.minecraft.structure.StructureStart;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.structure.Structure;
+
+import java.util.Map;
+import java.util.function.Consumer;
 
 
 public class RestrictionsHelper {
@@ -55,5 +60,22 @@ public class RestrictionsHelper {
                 });
             });
         }
+    }
+
+    public static void executeIfHasStructureOrElse(ServerWorld world, BlockPos pos, Consumer<Structure> presentAction, Runnable elseAction){
+        if(world.getStructureAccessor().hasStructureReferences(pos)){
+            Map<Structure, LongSet> structureMap = world.getChunk(pos).getStructureReferences();
+
+            structureMap.keySet().stream().filter(structure -> {
+                return world.getStructureAccessor().getStructureAt(pos, structure) != StructureStart.DEFAULT;
+            }).findFirst().ifPresentOrElse(presentAction, elseAction);
+        }
+        else {
+            elseAction.run();
+        }
+    }
+
+    public static void executeIfHasStructure(ServerWorld world, BlockPos pos, Consumer<Structure> presentAction){
+        executeIfHasStructureOrElse(world, pos, presentAction, () -> {});
     }
 }
