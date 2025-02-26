@@ -6,10 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.sources.BlockStateSourceEntry;
-import net.fryc.frycstructmod.structure.restrictions.sources.LivingEntitySourceEntry;
-import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
-import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
+import net.fryc.frycstructmod.structure.restrictions.sources.*;
 import net.fryc.frycstructmod.util.FrycJsonHelper;
 import net.minecraft.block.Block;
 import net.minecraft.registry.Registries;
@@ -63,7 +60,7 @@ public class FrycStructRestrictions {
 
 
     public static void registerSourceEntryTypes(){
-        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("block", (jsonObject, id) -> {
+        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("blockBreak", (jsonObject, id) -> {
             String stringId = JsonHelper.getString(jsonObject, "entry_id");
             int sourceStrength = JsonHelper.getInt(jsonObject, "strength");
             Identifier blockId = Registries.BLOCK.getIds().stream().filter(identifier -> {
@@ -73,7 +70,7 @@ public class FrycStructRestrictions {
             return new BlockStateSourceEntry(blockId, sourceStrength);
         });
 
-        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("mob", (jsonObject, id) -> {
+        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("mobKill", (jsonObject, id) -> {
             String stringId = JsonHelper.getString(jsonObject, "entry_id");
             int sourceStrength = JsonHelper.getInt(jsonObject, "strength");
             Identifier mobId = Registries.ENTITY_TYPE.getIds().stream().filter(identifier -> {
@@ -83,7 +80,7 @@ public class FrycStructRestrictions {
             return new LivingEntitySourceEntry(mobId, sourceStrength);
         });
 
-        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("persistentMob", (jsonObject, id) -> {
+        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("persistentMobKill", (jsonObject, id) -> {
             String stringId = JsonHelper.getString(jsonObject, "entry_id");
             int sourceStrength = JsonHelper.getInt(jsonObject, "strength");
             Identifier mobId = Registries.ENTITY_TYPE.getIds().stream().filter(identifier -> {
@@ -91,6 +88,16 @@ public class FrycStructRestrictions {
             }).findFirst().get();
 
             return new PersistentMobSourceEntry(mobId, sourceStrength);
+        });
+
+        RestrictionRegistries.SOURCE_ENTRY_TYPES.put("itemUseFinish", (jsonObject, id) -> {
+            String stringId = JsonHelper.getString(jsonObject, "entry_id");
+            int sourceStrength = JsonHelper.getInt(jsonObject, "strength");
+            Identifier itemId = Registries.ITEM.getIds().stream().filter(identifier -> {
+                return identifier.toString().equals(stringId);
+            }).findFirst().get();
+
+            return new ItemStackSourceEntry(itemId, sourceStrength);
         });
     }
 }

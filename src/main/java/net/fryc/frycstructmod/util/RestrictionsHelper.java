@@ -75,7 +75,7 @@ public class RestrictionsHelper {
         }
     }
 
-    public static void executeIfHasStructure(ServerWorld world, BlockPos pos, Consumer<Structure> presentAction){
-        executeIfHasStructureOrElse(world, pos, presentAction, () -> {});
+    public static void executeIfHasStructure(ServerWorld world, BlockPos pos, Consumer<Structure> action){
+        executeIfHasStructureOrElse(world, pos, action, () -> {});
     }
 }

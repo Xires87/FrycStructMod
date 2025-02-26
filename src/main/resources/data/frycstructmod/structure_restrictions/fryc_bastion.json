@@ -30,7 +30,7 @@
     "power": 8,
     "entries": [
       {
-        "type": "persistentMob",
+        "type": "persistentMobKill",
         "entry_id": "minecraft:piglin_brute",
         "strength": 1
       }

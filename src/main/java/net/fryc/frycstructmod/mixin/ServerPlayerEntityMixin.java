@@ -31,20 +31,22 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
     @Nullable
     private StructureStart currentStructure = null;
 
-    private int delay = 30;
+    private int delay = 120;
 
     public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
         super(world, pos, yaw, gameProfile);
     }
 
     @Inject(method = "tick()V", at = @At("TAIL"))
-    private void test(CallbackInfo info) {
+    private void checkForStructureEnter(CallbackInfo info) {
 
         if(--this.delay < 1){
             ServerWorld world = ((ServerWorld) this.getWorld());
             RestrictionsHelper.executeIfHasStructureOrElse(world, this.getBlockPos(), structure -> {
+
                 StructureStart start = world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
                 HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
+
                 if(startWithRestrictions.hasActiveRestrictions()){
                     if(startWithRestrictions.getStructureRestrictionInstance() == null){
                         startWithRestrictions.createStructureRestrictionInstance(world.getRegistryManager());

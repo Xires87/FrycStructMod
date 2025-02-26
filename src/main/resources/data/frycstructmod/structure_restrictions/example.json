@@ -19,14 +19,19 @@
     "power": 10,
     "entries": [
       {
-        "type": "persistentMob",
+        "type": "persistentMobKill",
         "entry_id": "minecraft:iron_golem",
         "strength": 1
       },
       {
-        "type": "block",
+        "type": "blockBreak",
         "entry_id": "minecraft:oak_log",
         "strength": 1
+      },
+      {
+        "type": "itemUseFinish",
+        "entry_id": "minecraft:cooked_porkchop",
+        "strength": 5
       }
     ]
   }

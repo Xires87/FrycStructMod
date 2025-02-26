@@ -9,6 +9,7 @@ import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
@@ -16,6 +17,7 @@ public class SourceEntryEvent<T> implements Event {
 
     public static final SourceEntryEvent<LivingEntity> ON_MOB_KILL = new SourceEntryEvent<>();
     public static final SourceEntryEvent<BlockState> ON_BLOCK_DESTROY = new SourceEntryEvent<>();
+    public static final SourceEntryEvent<ItemStack> ON_ITEM_USE_FINISH = new SourceEntryEvent<>();
 
 
     public void triggerEvent(T source, PlayerEntity player, ServerWorld world, BlockPos pos){

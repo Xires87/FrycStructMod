@@ -15,7 +15,7 @@
     "power": 10,
     "entries": [
       {
-        "type": "persistentMob",
+        "type": "persistentMobKill",
         "entry_id": "minecraft:evoker",
         "strength": 1
       }
