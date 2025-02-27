@@ -1,6 +1,5 @@
 package net.fryc.frycstructmod.mixin.explosion;
 
-import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.block.BlockState;

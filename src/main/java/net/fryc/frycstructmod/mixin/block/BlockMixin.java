@@ -1,4 +1,4 @@
-package net.fryc.frycstructmod.mixin;
+package net.fryc.frycstructmod.mixin.block;
 
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
