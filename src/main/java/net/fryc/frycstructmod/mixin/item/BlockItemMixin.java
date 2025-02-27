@@ -1,4 +1,4 @@
-package net.fryc.frycstructmod.mixin;
+package net.fryc.frycstructmod.mixin.item;
 
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;

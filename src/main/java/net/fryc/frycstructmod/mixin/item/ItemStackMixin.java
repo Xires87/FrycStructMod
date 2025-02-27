@@ -1,4 +1,4 @@
-package net.fryc.frycstructmod.mixin;
+package net.fryc.frycstructmod.mixin.item;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemStack;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;

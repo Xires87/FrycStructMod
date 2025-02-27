@@ -1,4 +1,4 @@
-package net.fryc.frycstructmod.mixin;
+package net.fryc.frycstructmod.mixin.entity;
 
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;

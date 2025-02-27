@@ -18,6 +18,7 @@ public class DefaultStructureRestriction extends AbstractStructureRestriction {
     private final boolean disallowPlacingIndestructibleBlocks;
     private final Set<Block> miningExcludedBlocks;
     private final Set<Block> placingExcludedBlocks;
+    private final float miningSpeedMultiplier = 0.00027F;// TODO dac to do konstruktora zeby mozna bylo w jsonie ustawiac
 
     public DefaultStructureRestriction(String structureId, boolean allowMining, boolean allowMiningPlayerBlocks, Set<Block> miningExcludedBlocks,
                                        boolean allowPlacing, boolean alwaysDisallowPlacingIndestructibleBlocks, Set<Block> placingExcludedBlocks, RestrictionSource restrictionSource){
@@ -37,7 +38,7 @@ public class DefaultStructureRestriction extends AbstractStructureRestriction {
             return originalSpeed;
         }
         else if(!this.canBeMined(block, playerEntity)){
-            return originalSpeed * 0.00027F;
+            return originalSpeed * this.miningSpeedMultiplier;
         }
 
         return originalSpeed;

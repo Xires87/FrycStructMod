@@ -1,4 +1,4 @@
-package net.fryc.frycstructmod.mixin;
+package net.fryc.frycstructmod.mixin.entity;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;

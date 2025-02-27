@@ -4,13 +4,15 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"StructureStartMixin",
-		"ServerPlayerEntityMixin",
 		"BlockMixin",
-		"BlockItemMixin",
-		"PlayerEntityMixin",
-		"ServerPlayerEntityMixin",
-		"LivingEntityMixin",
-		"ItemStackMixin"
+		"item/BlockItemMixin",
+		"item/ItemStackMixin",
+		"entity/PlayerEntityMixin",
+		"entity/ServerPlayerEntityMixin",
+		"entity/LivingEntityMixin",
+		"explosion/ExplosionMixin",
+		"explosion/ExplosionBehaviorMixin",
+		"explosion/EntityExplosionBehaviorMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

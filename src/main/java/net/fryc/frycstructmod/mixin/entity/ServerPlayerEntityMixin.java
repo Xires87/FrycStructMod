@@ -1,4 +1,4 @@
-package net.fryc.frycstructmod.mixin;
+package net.fryc.frycstructmod.mixin.entity;
 
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
