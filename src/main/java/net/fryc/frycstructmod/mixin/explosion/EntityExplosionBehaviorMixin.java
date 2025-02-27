@@ -17,16 +17,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 abstract class EntityExplosionBehaviorMixin {
 
     @Inject(method = "canDestroyBlock(" +
-            "Lnet/minecraft/world/explosion/Explosion;" +
-            "Lnet/minecraft/world/BlockView;" +
-            "Lnet/minecraft/util/math/BlockPos;" +
-            "Lnet/minecraft/block/BlockState;" +
-            "F" +
+                "Lnet/minecraft/world/explosion/Explosion;" +
+                "Lnet/minecraft/world/BlockView;" +
+                "Lnet/minecraft/util/math/BlockPos;" +
+                "Lnet/minecraft/block/BlockState;" +
+                "F" +
             ")Z", at = @At("RETURN"), cancellable = true)
     private void disallowDestroyingWhenNeeded(Explosion explosion, BlockView world, BlockPos pos, BlockState state, float power, CallbackInfoReturnable<Boolean> ret) {
         if(((HoldsStructureStart) explosion).getStructureStart() != null){
-            StructureRestrictionInstance strResInstance = ((HasRestrictions) (Object) ((HoldsStructureStart) explosion).getStructureStart()).getStructureRestrictionInstance();
-            if(strResInstance != null){
+            if(((HasRestrictions) (Object) ((HoldsStructureStart) explosion).getStructureStart()).hasActiveRestrictions()){
                 ret.setReturnValue(false);// TODO dac tu checka na restrykcje i wtedy blokowac
             }
         }
