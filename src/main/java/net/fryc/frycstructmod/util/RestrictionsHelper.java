@@ -50,15 +50,19 @@ public class RestrictionsHelper {
 
     public static void checkForPersistentEntitiesOnEnter(StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
         if(restrictionInstance != null){
-            restrictionInstance.getStructureRestriction().getRestrictionSource().getEntries().stream().filter(entry -> {
-                return entry instanceof PersistentMobSourceEntry;
-            }).toList().forEach(entry -> {
-                EntityType.get(((PersistentMobSourceEntry) entry).getSourceId().toString()).ifPresent(type -> {
-                    if(!RestrictionsHelper.findPersistentMobInStructure(world, start, type)){
-                        ((HasRestrictions) (Object) start).setActiveRestrictions(false);
-                    }
+            // TODO zrobic zeby WSZYSTKIE persistent moby musialy umrzec zeby wylaczylo
+            restrictionInstance.getStructureRestriction().forEach(restriction -> {
+                restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
+                    return entry instanceof PersistentMobSourceEntry;
+                }).toList().forEach(entry -> {
+                    EntityType.get(((PersistentMobSourceEntry) entry).getSourceId().toString()).ifPresent(type -> {
+                        if(!RestrictionsHelper.findPersistentMobInStructure(world, start, type)){
+                            ((HasRestrictions) (Object) start).setActiveRestrictions(false);
+                        }
+                    });
                 });
             });
+
         }
     }
 

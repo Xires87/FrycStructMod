@@ -17,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashMap;
+
 @Mixin(PlayerEntity.class)
 abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedByStructure {
 
@@ -31,10 +33,12 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
         if(this.isAffectedByStructure()){
-            AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(this.getStructureId());
-            if(restriction != null){
-                if(restriction instanceof DefaultStructureRestriction defRestriction){
-                    return defRestriction.modifyBlockBreakingSpeedWhenNeeded(original, block, ((PlayerEntity)(Object)this));
+            HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(this.getStructureId());
+            if(restrictions != null){
+                if(restrictions.containsKey("default")){
+                    return ((DefaultStructureRestriction) restrictions.get("default")).modifyBlockBreakingSpeedWhenNeeded(
+                            original, block, ((PlayerEntity)(Object)this)
+                    );
                 }
             }
         }

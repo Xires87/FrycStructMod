@@ -13,6 +13,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.HashMap;
+
 public class SourceEntryEvent<T> implements Event {
 
     public static final SourceEntryEvent<LivingEntity> ON_MOB_KILL = new SourceEntryEvent<>();
@@ -22,14 +24,16 @@ public class SourceEntryEvent<T> implements Event {
 
     public void triggerEvent(T source, PlayerEntity player, ServerWorld world, BlockPos pos){
         if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-            AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
-            if(restriction != null){
-                restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
-                    return entry.getEvent().equals(this);
-                }).forEach(entry -> {
-                    if(((SourceEntry<T>) entry).affectOwner(world, ((HoldsStructureStart) player).getStructureStart(), source)){
-                        RestrictionsHelper.spawnSoulParticlesServerSided(world, pos);
-                    }
+            HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
+            if(restrictions != null){
+                restrictions.values().forEach(res -> {
+                    res.getRestrictionSource().getEntries().stream().filter(entry -> {
+                        return entry.getEvent().equals(this);
+                    }).forEach(entry -> {
+                        if(((SourceEntry<T>) entry).affectOwner(world, ((HoldsStructureStart) player).getStructureStart(), source)){
+                            RestrictionsHelper.spawnSoulParticlesServerSided(world, pos);
+                        }
+                    });
                 });
             }
         }

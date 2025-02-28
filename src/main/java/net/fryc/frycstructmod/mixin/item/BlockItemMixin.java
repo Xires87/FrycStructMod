@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashMap;
+
 @Mixin(BlockItem.class)
 abstract class BlockItemMixin {
 
@@ -41,14 +43,14 @@ abstract class BlockItemMixin {
         PlayerEntity player = context.getPlayer();
         if(player != null){
             if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-                AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
-                if(restriction != null){
-                    if(restriction instanceof DefaultStructureRestriction defRestriction){
+                HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
+                if(restrictions != null){
+                    if(restrictions.containsKey("default")){
                         ItemPlacementContext itemPlacementContext = this.getPlacementContext(context);
                         if(itemPlacementContext != null){
                             BlockState blockState = this.getPlacementState(itemPlacementContext);
                             if(blockState != null){
-                                if(!defRestriction.canBePlaced(blockState, itemPlacementContext)){
+                                if(!((DefaultStructureRestriction) restrictions.get("default")).canBePlaced(blockState, itemPlacementContext)){
                                     ret.setReturnValue(ActionResult.FAIL);
                                 }
                             }

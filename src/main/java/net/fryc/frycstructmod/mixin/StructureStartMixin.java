@@ -21,6 +21,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashMap;
+
 @Mixin(StructureStart.class)
 abstract class StructureStartMixin implements HasRestrictions {
 
@@ -88,9 +90,9 @@ abstract class StructureStartMixin implements HasRestrictions {
     public void createStructureRestrictionInstance(DynamicRegistryManager manager){
         Identifier id = manager.get(RegistryKeys.STRUCTURE).getId(((StructureStart) (Object) this).getStructure());
         if(id != null){
-            AbstractStructureRestriction restriction = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(id.toString());
-            if(restriction != null){
-                this.structureRestrictionInstance = new StructureRestrictionInstance(restriction);
+            HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(id.toString());
+            if(restrictions != null){
+                this.structureRestrictionInstance = new StructureRestrictionInstance(restrictions.values());
             }
             else {
                 this.setActiveRestrictions(false);

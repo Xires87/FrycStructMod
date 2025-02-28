@@ -22,6 +22,8 @@ public class StructureRestrictionsResourceReloadListener implements SimpleSynchr
 
     @Override
     public void reload(ResourceManager manager) {
+        RestrictionRegistries.STRUCTURE_RESTRICTIONS.clear();
+
         for(Identifier id : manager.findResources(STRUCTURE_RESTRICTIONS_PATH, path -> path.getPath().endsWith(".json")).keySet()) {
             try(InputStream stream = manager.getResource(id).get().getInputStream()) {
                 JsonObject jsonObject = JsonParser.parseString(new String(stream.readAllBytes())).getAsJsonObject();
