@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Set;
 
 public class StructureRestrictionInstance {
-
+// TODO zrobic zeby sourcey byly shared albo separate i jesli shared to trzeba okreslic czy nalezy dodawac te wartosci czy jak
     private final Set<AbstractStructureRestriction> structureRestrictions;
     private int currentPower;
 

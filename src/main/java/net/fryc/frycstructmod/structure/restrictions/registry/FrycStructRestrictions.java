@@ -84,7 +84,10 @@ public class FrycStructRestrictions {
                 return identifier.toString().equals(stringId);
             }).findFirst().get();
 
-            return new PersistentMobSourceEntry(mobId, sourceStrength);
+            boolean checkForOther = JsonHelper.getBoolean(jsonObject, "checkForOtherPersistentMobs", true);
+            boolean forcePersistent = JsonHelper.getBoolean(jsonObject, "forcePersistent", true);
+
+            return new PersistentMobSourceEntry(mobId, sourceStrength, forcePersistent, checkForOther);
         });
 
         RestrictionRegistries.registerSourceEntryType("itemUseFinish", (jsonObject, id) -> {

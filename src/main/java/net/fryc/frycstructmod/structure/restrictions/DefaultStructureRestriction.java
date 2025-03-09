@@ -10,7 +10,7 @@ import net.minecraft.item.ItemUsageContext;
 
 import java.util.Set;
 
-public final class DefaultStructureRestriction extends AbstractStructureRestriction {
+public class DefaultStructureRestriction extends AbstractStructureRestriction {
 
     private final boolean allowMining;
     private final boolean allowMiningPlayerBlocks;

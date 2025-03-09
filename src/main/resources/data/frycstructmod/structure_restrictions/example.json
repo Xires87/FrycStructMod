@@ -16,12 +16,19 @@
     "always_disallow_when_indestructible": true
   },
   "source": {
+    "shared": true,
     "power": 10,
     "entries": [
       {
         "type": "persistentMobKill",
         "entry_id": "minecraft:iron_golem",
         "strength": 1
+      },
+      {
+        "type": "persistentMobKill",
+        "entry_id": "minecraft:villager",
+        "strength": 1,
+        "forcePersistent": false
       },
       {
         "type": "blockBreak",

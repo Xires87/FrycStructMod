@@ -36,7 +36,7 @@ abstract class LivingEntityMixin extends Entity implements Attackable {
                             HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
 
                             if(startWithRestrictions.hasActiveRestrictions()){
-                                RestrictionsHelper.checkForPersistentEntitiesOnEnter(
+                                RestrictionsHelper.checkForPersistentEntitiesFromSource(
                                         startWithRestrictions.getStructureRestrictionInstance(),
                                         ((ServerWorld) mob.getWorld()),
                                         start

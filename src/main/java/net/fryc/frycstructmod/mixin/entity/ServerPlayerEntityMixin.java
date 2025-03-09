@@ -62,7 +62,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                                 this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
 
                                 // checks for persistent entities on enter in case they somehow died (without player's help)
-                                RestrictionsHelper.checkForPersistentEntitiesOnEnter(startWithRestrictions.getStructureRestrictionInstance(), world, start);
+                                RestrictionsHelper.checkForPersistentEntitiesFromSource(startWithRestrictions.getStructureRestrictionInstance(), world, start);
                             }
                             else {
                                 FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
