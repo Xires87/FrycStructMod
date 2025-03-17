@@ -16,7 +16,7 @@ public abstract class AbstractStructureRestriction {
     public String getStructureId() {
         return this.structureId;
     }
-// TODO zrobic restrykcje na status effecty
+
     public RestrictionSource getRestrictionSource(){
         return this.restrictionSource;
     }

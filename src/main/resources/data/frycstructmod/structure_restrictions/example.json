@@ -6,7 +6,8 @@
     "except": [
       "minecraft:oak_log"
     ],
-    "always_allow_when_placed_by_player": false
+    "always_allow_when_placed_by_player": false,
+    "mining_speed_multiplier": 0.0
   },
   "placing": {
     "allow": false,
