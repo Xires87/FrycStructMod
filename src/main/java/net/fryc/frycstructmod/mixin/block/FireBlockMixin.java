@@ -27,6 +27,8 @@ abstract class FireBlockMixin {
             if(start.hasActiveRestrictions()){
                 if(start.getStructureRestrictionInstance() != null){
                     info.cancel();// TODO sprawdzic tutaj czy na tym bloku nie powinno tickowac i wtedy cancelowac (i jeszcze dac opcje do usuwania ognia, ktory nie znika jak tickow nie ma)
+
+                    //world.removeBlock(pos, false); // TODO dac to jesli powinno usuwac ogien
                 }
             }
         });

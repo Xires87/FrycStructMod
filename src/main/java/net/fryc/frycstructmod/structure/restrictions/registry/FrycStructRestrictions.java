@@ -25,6 +25,7 @@ public class FrycStructRestrictions {
 
             boolean allowMining = JsonHelper.getBoolean(miningObject, "allow", true);
             boolean allowMiningPlayerBlocks = JsonHelper.getBoolean(miningObject, "always_allow_when_placed_by_player", true);
+            float miningSpeedMultiplier = JsonHelper.getFloat(miningObject, "mining_speed_multiplier", 0.0027F);
             ImmutableSet<Block> miningExceptions = FrycJsonHelper.getExcludedBlocks(mineExcept, id);
 
             boolean allowPlacing = JsonHelper.getBoolean(placingObject, "allow", true);
@@ -49,7 +50,7 @@ public class FrycStructRestrictions {
             }
 
             RestrictionRegistries.registerStructureRestriction(identifier, "default", new DefaultStructureRestriction(
-                    identifier, allowMining, allowMiningPlayerBlocks, miningExceptions, allowPlacing,
+                    identifier, allowMining, allowMiningPlayerBlocks, miningSpeedMultiplier, miningExceptions, allowPlacing,
                     disallowPlacingIndestructibleBlocks, placingExceptions, builder.build()
             ));
         }));

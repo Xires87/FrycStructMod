@@ -18,15 +18,17 @@ public class DefaultStructureRestriction extends AbstractStructureRestriction {
     private final boolean disallowPlacingIndestructibleBlocks;
     private final Set<Block> miningExcludedBlocks;
     private final Set<Block> placingExcludedBlocks;
-    private final float miningSpeedMultiplier = 0.00027F;// TODO dac to do konstruktora zeby mozna bylo w jsonie ustawiac
+    private final float miningSpeedMultiplier;
 
-    public DefaultStructureRestriction(String structureId, boolean allowMining, boolean allowMiningPlayerBlocks, Set<Block> miningExcludedBlocks,
-                                       boolean allowPlacing, boolean alwaysDisallowPlacingIndestructibleBlocks, Set<Block> placingExcludedBlocks, RestrictionSource restrictionSource){
+    public DefaultStructureRestriction(String structureId, boolean allowMining, boolean allowMiningPlayerBlocks, float miningSpeedMultiplier,
+                                       Set<Block> miningExcludedBlocks, boolean allowPlacing, boolean alwaysDisallowPlacingIndestructibleBlocks,
+                                       Set<Block> placingExcludedBlocks, RestrictionSource restrictionSource){
 
         super(structureId, restrictionSource);
         this.allowMining = allowMining;
         this.allowMiningPlayerBlocks = allowMiningPlayerBlocks;
         this.miningExcludedBlocks = miningExcludedBlocks;
+        this.miningSpeedMultiplier = miningSpeedMultiplier;
         this.allowPlacing = allowPlacing;
         this.disallowPlacingIndestructibleBlocks = alwaysDisallowPlacingIndestructibleBlocks;
         this.placingExcludedBlocks = placingExcludedBlocks;
