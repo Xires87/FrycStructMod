@@ -3,8 +3,8 @@ package net.fryc.frycstructmod.mixin.entity;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
+import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
@@ -17,12 +17,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Mixin(PlayerEntity.class)
 abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedByStructure {
 
     private String affectedByStructure = "";
+    private final Set<String> restrictionsImmuneTo = new HashSet<>();
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -32,17 +35,10 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
     @ModifyReturnValue(method = "getBlockBreakingSpeed(Lnet/minecraft/block/BlockState;)F", at = @At("RETURN"))
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
-        if(this.isAffectedByStructure()){
-            HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(this.getStructureId());
-            if(restrictions != null){
-                if(restrictions.containsKey("default")){
-                    return ((DefaultStructureRestriction) restrictions.get("default")).modifyBlockBreakingSpeedWhenNeeded(
-                            original, block, ((PlayerEntity)(Object)this)
-                    );
-                }
-            }
-        }
-        return original;
+        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfAffectsPlayer("default", ((PlayerEntity)(Object) this));
+        return optional.map(abstractStructureRestriction -> ((DefaultStructureRestriction) abstractStructureRestriction).modifyBlockBreakingSpeedWhenNeeded(
+                original, block, ((PlayerEntity) (Object) this)
+        )).orElse(original);
     }
 
     @Inject(method = "onKilledOther(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/LivingEntity;)Z", at = @At("HEAD"))
@@ -60,5 +56,13 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
 
     public String getStructureId(){
         return this.affectedByStructure;
+    }
+
+    public Set<String> getRestrictionsImmuneTo(){
+        return this.restrictionsImmuneTo;
+    }
+
+    public boolean shouldBeAffectedByRestriction(String restrictionType){
+        return !this.getRestrictionsImmuneTo().contains(restrictionType);
     }
 }

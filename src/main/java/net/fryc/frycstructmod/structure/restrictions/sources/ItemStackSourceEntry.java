@@ -20,7 +20,7 @@ public class ItemStackSourceEntry extends AbstractSourceEntry<ItemStack> {
         if(Registries.ITEM.getId(source.getItem()).equals(this.sourceId)){
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
-                if(instance.decreaseCurrentPower(this.sourceStrength)){
+                if(instance.decreaseCurrentPower(this.sourceStrength, this)){
                     ((HasRestrictions) (Object) structureStart).setActiveRestrictions(false);
                 }
 

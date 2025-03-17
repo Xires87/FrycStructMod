@@ -1,10 +1,9 @@
 package net.fryc.frycstructmod.mixin.item;
 
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.util.ModProperties;
-import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
+import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -18,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashMap;
+import java.util.Optional;
 
 @Mixin(BlockItem.class)
 abstract class BlockItemMixin {
@@ -42,18 +41,14 @@ abstract class BlockItemMixin {
     private void disallowPlacingWhenAffectedByStructure(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> ret) {
         PlayerEntity player = context.getPlayer();
         if(player != null){
-            if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-                HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
-                if(restrictions != null){
-                    if(restrictions.containsKey("default")){
-                        ItemPlacementContext itemPlacementContext = this.getPlacementContext(context);
-                        if(itemPlacementContext != null){
-                            BlockState blockState = this.getPlacementState(itemPlacementContext);
-                            if(blockState != null){
-                                if(!((DefaultStructureRestriction) restrictions.get("default")).canBePlaced(blockState, itemPlacementContext)){
-                                    ret.setReturnValue(ActionResult.FAIL);
-                                }
-                            }
+            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfAffectsPlayer("default", player);
+            if(optional.isPresent()){
+                ItemPlacementContext itemPlacementContext = this.getPlacementContext(context);
+                if(itemPlacementContext != null){
+                    BlockState blockState = this.getPlacementState(itemPlacementContext);
+                    if(blockState != null){
+                        if(!((DefaultStructureRestriction) optional.get()).canBePlaced(blockState, itemPlacementContext)){
+                            ret.setReturnValue(ActionResult.FAIL);
                         }
                     }
                 }

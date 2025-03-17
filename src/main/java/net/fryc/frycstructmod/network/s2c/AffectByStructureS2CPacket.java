@@ -13,6 +13,12 @@ public class AffectByStructureS2CPacket {
         ClientPlayerEntity player = client.player;
         if(player != null){
             ((CanBeAffectedByStructure) player).setAffectedByStructure(buf.readString());
+            ((CanBeAffectedByStructure) player).getRestrictionsImmuneTo().clear();
+            int i = buf.readInt();
+            while(i > 0){
+                ((CanBeAffectedByStructure) player).getRestrictionsImmuneTo().add(buf.readString());
+                i--;
+            }
         }
     }
 }

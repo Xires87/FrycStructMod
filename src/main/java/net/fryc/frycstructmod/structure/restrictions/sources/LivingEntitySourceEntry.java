@@ -21,7 +21,8 @@ public class LivingEntitySourceEntry extends AbstractSourceEntry<LivingEntity>{
         if(Registries.ENTITY_TYPE.getId(source.getType()).equals(this.sourceId)){
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
-                if(instance.decreaseCurrentPower(this.sourceStrength)){
+                if(instance.decreaseCurrentPower(this.sourceStrength, this)){
+                    //instance.tryToDisableRestrictions();
                     ((HasRestrictions) (Object) structureStart).setActiveRestrictions(false);
                 }
 

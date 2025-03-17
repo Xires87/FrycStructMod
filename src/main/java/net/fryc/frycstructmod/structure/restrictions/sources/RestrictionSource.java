@@ -7,13 +7,15 @@ import java.util.Set;
 public class RestrictionSource {
 
     private final int power;
+    private final boolean shared;
 
     private final Set<SourceEntry<?>> entries;
 
 
-    private RestrictionSource(int power, Set<SourceEntry<?>> entries){
+    private RestrictionSource(int power, Set<SourceEntry<?>> entries, boolean shared){
         this.power = power;
         this.entries = entries;
+        this.shared = shared;
     }
 
     // to make sure all entries have their owner
@@ -30,10 +32,15 @@ public class RestrictionSource {
         return this.power;
     }
 
+    public boolean isShared(){
+        return this.shared;
+    }
+
 
     public static class Builder {
         private final ImmutableSet.Builder<SourceEntry<?>> sourceEntries = ImmutableSet.builder();
         private int power = 1;
+        private boolean shared = false;
 
         private Builder(){
         }
@@ -53,8 +60,13 @@ public class RestrictionSource {
             return this;
         }
 
+        public Builder setShared(boolean shared){
+            this.shared = shared;
+            return this;
+        }
+
         public RestrictionSource build(){
-            RestrictionSource source = new RestrictionSource(this.power, this.sourceEntries.build());
+            RestrictionSource source = new RestrictionSource(this.power, this.sourceEntries.build(), this.shared);
             for(SourceEntry<?> entry : source.getEntries()){
                 entry.setOwner(source);
             }

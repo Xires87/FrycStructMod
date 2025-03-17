@@ -34,8 +34,9 @@ public class FrycStructRestrictions {
 
             JsonObject sourceObject = JsonHelper.getObject(jsonObject, "source");
             int power = JsonHelper.getInt(sourceObject, "power");
+            boolean shared = JsonHelper.getBoolean(sourceObject, "shared", false);
 
-            RestrictionSource.Builder builder = RestrictionSource.builder().setPower(power);
+            RestrictionSource.Builder builder = RestrictionSource.builder().setPower(power).setShared(shared);
 
             JsonArray sourceEntries = JsonHelper.getArray(sourceObject, "entries");
             for(JsonElement element : sourceEntries){

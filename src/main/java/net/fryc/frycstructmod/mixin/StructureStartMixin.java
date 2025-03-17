@@ -26,7 +26,7 @@ import java.util.HashMap;
 @Mixin(StructureStart.class)
 abstract class StructureStartMixin implements HasRestrictions {
 
-    private boolean restrictionsActive = false;
+    private boolean restrictionsActive = false;// TODO zapisywanie separate powers do nbt
 
     @Nullable
     private StructureRestrictionInstance structureRestrictionInstance = null;
@@ -43,7 +43,7 @@ abstract class StructureStartMixin implements HasRestrictions {
         if(original.contains("Children")){
             original.putBoolean("structureRestrictionActive", this.hasActiveRestrictions());
             if(this.getStructureRestrictionInstance() != null){
-                original.putInt("structureRestrictionInstancePower", this.getStructureRestrictionInstance().getCurrentPower());
+                original.putInt("structureRestrictionInstancePower", this.getStructureRestrictionInstance().getCurrentSharedPower());
             }
         }
         return original;
@@ -62,7 +62,7 @@ abstract class StructureStartMixin implements HasRestrictions {
                         if(nbt.contains("structureRestrictionInstancePower")){
                             str.createStructureRestrictionInstance(context.registryManager());
                             if(str.getStructureRestrictionInstance() != null){
-                                str.getStructureRestrictionInstance().setCurrentPower(nbt.getInt("structureRestrictionInstancePower"));
+                                str.getStructureRestrictionInstance().setCurrentSharedPower(nbt.getInt("structureRestrictionInstancePower"));
                             }
                         }
                     }

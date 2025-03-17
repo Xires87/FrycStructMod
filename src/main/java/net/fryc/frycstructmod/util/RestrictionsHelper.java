@@ -8,12 +8,15 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
+import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -23,6 +26,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -53,7 +58,7 @@ public class RestrictionsHelper {
 
     public static void checkForPersistentEntitiesFromSource(StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
         if(restrictionInstance != null){
-            for(AbstractStructureRestriction restriction : restrictionInstance.getStructureRestriction()){
+            for(AbstractStructureRestriction restriction : restrictionInstance.getStructureRestrictions()){
                 for(SourceEntry<?> entry : restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
                     return entry instanceof PersistentMobSourceEntry;
                 }).toList()){
@@ -85,5 +90,32 @@ public class RestrictionsHelper {
 
     public static void executeIfHasStructure(ServerWorld world, BlockPos pos, Consumer<Structure> action){
         executeIfHasStructureOrElse(world, pos, action, () -> {});
+    }
+
+    public static Optional<AbstractStructureRestriction> getRestrictionBySource(Collection<AbstractStructureRestriction> restrictions, SourceEntry<?> source){
+        return restrictions.stream().filter(restriction -> {
+            return restriction.getRestrictionSource().getEntries().contains(source);
+        }).findFirst();
+    }
+
+    public static Optional<AbstractStructureRestriction> getRestrictionByType(String type, String structureId){
+        HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(structureId);
+        if(restrictions != null){
+            if(restrictions.containsKey(type)){
+                return Optional.of(restrictions.get(type));
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<AbstractStructureRestriction> getRestrictionByTypeIfAffectsPlayer(String type, PlayerEntity player){
+        if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
+            if(((CanBeAffectedByStructure) player).shouldBeAffectedByRestriction(type)){
+                return getRestrictionByType(type, ((CanBeAffectedByStructure) player).getStructureId());
+            }
+        }
+
+        return Optional.empty();
     }
 }

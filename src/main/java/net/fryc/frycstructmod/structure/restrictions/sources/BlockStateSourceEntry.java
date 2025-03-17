@@ -31,7 +31,7 @@ public class BlockStateSourceEntry extends AbstractSourceEntry<BlockState> {
         if(Registries.BLOCK.getId(source.getBlock()).equals(this.sourceId)){
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
-                if(instance.decreaseCurrentPower(this.sourceStrength)){
+                if(instance.decreaseCurrentPower(this.sourceStrength, this)){// TODO dac tutaj na instancji ze powinna odswiezyc i wtedy wszystkim by dala te odpornosc
                     ((HasRestrictions) (Object) structureStart).setActiveRestrictions(false);
                 }
 
