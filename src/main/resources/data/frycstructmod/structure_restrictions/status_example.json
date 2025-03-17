@@ -1,0 +1,34 @@
+{
+  "type": "status_effect",
+  "structure_id": "minecraft:village_plains",
+  "entities_affected": {
+    "affect_all": false,
+    "except": [
+      "minecraft:player"
+    ]
+  },
+  "allowed_effects": {
+    "allowed": true,
+    "except": [
+      "minecraft:regeneration"
+    ]
+  },
+  "persistent_effects": [
+    {
+      "id": "minecraft:slowness",
+      "amplifier": 1,
+      "duration": 0
+    }
+  ],
+  "source": {
+    "shared": true,
+    "power": 10,
+    "entries": [
+      {
+        "type": "itemUseFinish",
+        "entry_id": "minecraft:cooked_porkchop",
+        "strength": 5
+      }
+    ]
+  }
+}
