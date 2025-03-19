@@ -4,6 +4,7 @@ import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstanc
 import net.fryc.frycstructmod.structure.restrictions.sources.events.Event;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.structure.StructureStart;
@@ -16,12 +17,12 @@ public class ItemStackSourceEntry extends AbstractSourceEntry<ItemStack> {
     }
 
     @Override
-    public boolean affectOwner(StructureStart structureStart, ItemStack source) {
+    public boolean affectOwner(StructureStart structureStart, ItemStack source, PlayerEntity player) {
         if(Registries.ITEM.getId(source.getItem()).equals(this.sourceId)){
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
                 if(instance.decreaseCurrentPower(this.sourceStrength, this)){
-                    ((HasRestrictions) (Object) structureStart).setActiveRestrictions(false);
+                    ((HasRestrictions) (Object) structureStart).tryToDisableRestrictionsAndUpdateRestrictionImmunity(instance, player);
                 }
 
                 return true;

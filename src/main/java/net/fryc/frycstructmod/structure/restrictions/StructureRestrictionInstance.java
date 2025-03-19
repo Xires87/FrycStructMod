@@ -49,7 +49,7 @@ public class StructureRestrictionInstance {
 
         return this.getCurrentSeperatePowers().get(restriction) == null || this.getCurrentSeperatePowers().get(restriction) < 1;
     }
-
+// TODO zapisac w instancji id struktury zebym nie musial w rejestracji szukac
     public Set<String> getDisabledRestrictionsIds(){
         HashSet<String> set = new HashSet<>();
         this.getStructureRestrictions().stream().findAny().ifPresent(id -> {

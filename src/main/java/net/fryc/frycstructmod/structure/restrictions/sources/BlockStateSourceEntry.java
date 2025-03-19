@@ -6,6 +6,7 @@ import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryE
 import net.fryc.frycstructmod.util.ModProperties;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.util.Identifier;
@@ -21,7 +22,7 @@ public class BlockStateSourceEntry extends AbstractSourceEntry<BlockState> {
      *  Returns true when restriction's power decreases
      */
     @Override
-    public boolean affectOwner(StructureStart structureStart, BlockState source) {
+    public boolean affectOwner(StructureStart structureStart, BlockState source, PlayerEntity player) {
         if(source.getProperties().contains(ModProperties.PLACED_BY_PLAYER)){
             if(source.get(ModProperties.PLACED_BY_PLAYER)){
                 return false;
@@ -31,8 +32,8 @@ public class BlockStateSourceEntry extends AbstractSourceEntry<BlockState> {
         if(Registries.BLOCK.getId(source.getBlock()).equals(this.sourceId)){
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
-                if(instance.decreaseCurrentPower(this.sourceStrength, this)){// TODO dac tutaj na instancji ze powinna odswiezyc i wtedy wszystkim by dala te odpornosc
-                    ((HasRestrictions) (Object) structureStart).setActiveRestrictions(false);
+                if(instance.decreaseCurrentPower(this.sourceStrength, this)){
+                    ((HasRestrictions) (Object) structureStart).tryToDisableRestrictionsAndUpdateRestrictionImmunity(instance, player);
                 }
 
                 return true;

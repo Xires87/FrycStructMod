@@ -5,6 +5,7 @@ import net.fryc.frycstructmod.structure.restrictions.sources.events.Event;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.util.Identifier;
@@ -17,13 +18,12 @@ public class LivingEntitySourceEntry extends AbstractSourceEntry<LivingEntity>{
     }
 
     @Override
-    public boolean affectOwner(StructureStart structureStart, LivingEntity source) {
+    public boolean affectOwner(StructureStart structureStart, LivingEntity source, PlayerEntity player) {
         if(Registries.ENTITY_TYPE.getId(source.getType()).equals(this.sourceId)){
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
                 if(instance.decreaseCurrentPower(this.sourceStrength, this)){
-                    //instance.tryToDisableRestrictions();
-                    ((HasRestrictions) (Object) structureStart).setActiveRestrictions(false);
+                    ((HasRestrictions) (Object) structureStart).tryToDisableRestrictionsAndUpdateRestrictionImmunity(instance, player);
                 }
 
                 return true;

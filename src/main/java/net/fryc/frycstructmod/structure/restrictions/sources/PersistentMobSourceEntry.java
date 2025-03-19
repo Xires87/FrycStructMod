@@ -4,6 +4,7 @@ import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.util.Identifier;
@@ -17,15 +18,18 @@ public class PersistentMobSourceEntry extends LivingEntitySourceEntry {
         this.forcePersistent = forcePersistent;
         this.checkForOtherPersistentEntities = checkForOtherPersistentEntities;
     }
-
+// TODO naprawic persistent entity (checkForOtherPersistentEntities powinno patrzec tylko na SWOJE sourcey jak jest separate albo na wsystkie SHARED sourcey jak shared jest)
     @Override
-    public boolean affectOwner(StructureStart structureStart, LivingEntity source) {
+    public boolean affectOwner(StructureStart structureStart, LivingEntity source, PlayerEntity player) {
         if(source instanceof MobEntity mob){
             if(!this.shouldForcePersistent() || (mob.isPersistent() || mob.cannotDespawn())){
-                if(super.affectOwner(structureStart, source)){
+                if(super.affectOwner(structureStart, source, player)){
                     if(!this.shouldCheckForOtherPersistentEntities()){
                         if(!RestrictionsHelper.findPersistentMobInStructure(mob.getWorld(), structureStart, mob.getType(), this.shouldForcePersistent())){
-                            ((HasRestrictions) (Object) structureStart).setActiveRestrictions(false);
+                            ((HasRestrictions) (Object) structureStart).tryToDisableRestrictionsAndUpdateRestrictionImmunity(
+                                    ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance(),
+                                    player
+                            );
                         }
                     }
                     else if(!source.getWorld().isClient()){

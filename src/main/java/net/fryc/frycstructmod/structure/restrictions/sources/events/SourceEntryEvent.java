@@ -30,7 +30,7 @@ public class SourceEntryEvent<T> implements Event {
                     res.getRestrictionSource().getEntries().stream().filter(entry -> {
                         return entry.getEvent().equals(this);
                     }).forEach(entry -> {
-                        if(((SourceEntry<T>) entry).affectOwner(world, ((HoldsStructureStart) player).getStructureStart(), source)){
+                        if(((SourceEntry<T>) entry).affectOwner(world, ((HoldsStructureStart) player).getStructureStart(), source, player)){
                             RestrictionsHelper.spawnSoulParticlesServerSided(world, pos);
                         }
                     });

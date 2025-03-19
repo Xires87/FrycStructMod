@@ -5,7 +5,13 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
+import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
+import net.fryc.frycstructmod.util.interfaces.PlayerLocator;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.TargetPredicate;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKeys;
@@ -13,7 +19,9 @@ import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiecesList;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,9 +30,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 @Mixin(StructureStart.class)
-abstract class StructureStartMixin implements HasRestrictions {
+abstract class StructureStartMixin implements HasRestrictions, PlayerLocator {
 
     private boolean restrictionsActive = false;// TODO zapisywanie separate powers do nbt
 
@@ -99,5 +109,29 @@ abstract class StructureStartMixin implements HasRestrictions {
             }
 
         }
+    }
+
+    public void tryToDisableRestrictionsAndUpdateRestrictionImmunity(StructureRestrictionInstance instance, PlayerEntity player){
+        Set<String> disabledRestrictions = instance.getDisabledRestrictionsIds();
+
+        if(!this.tryToDisableRestrictions(instance.getDisabledRestrictionsIds(), disabledRestrictions)){
+            this.getPlayersInStructure(player.getWorld()).forEach(playerEntity -> {
+                ((CanBeAffectedByStructure) playerEntity).getRestrictionsImmuneTo().addAll(disabledRestrictions);
+            });
+        }
+    }
+
+    public boolean tryToDisableRestrictions(Set<String> instanceRestrictions, Set<String> disabledRestrictions){
+        if(disabledRestrictions.size() >= instanceRestrictions.size()){
+            this.setActiveRestrictions(false);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public List<PlayerEntity> getPlayersInStructure(World world){
+        return world.getEntitiesByType(EntityType.PLAYER, Box.from(((StructureStart)(Object)this).getBoundingBox()), LivingEntity::isAlive);
     }
 }
