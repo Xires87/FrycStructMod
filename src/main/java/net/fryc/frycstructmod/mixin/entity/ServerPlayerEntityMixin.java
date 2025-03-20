@@ -55,17 +55,19 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                     // second check, because createStructureRestrictionInstance([...]); can disable restrictions
                     if(startWithRestrictions.hasActiveRestrictions()){
                         if(start != this.currentStructure) {
-                            Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
-                            if(id != null){
-                                this.currentStructure = start;
-                                this.setAffectedByStructureServerAndClient(id.toString());
-                                this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
+                            if(!RestrictionsHelper.tryToRemoveRestrictionsFromStructure(start, startWithRestrictions.getStructureRestrictionInstance())){
+                                Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
+                                if(id != null){
+                                    this.currentStructure = start;
+                                    this.setAffectedByStructureServerAndClient(id.toString());
+                                    this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
 
-                                // checks for persistent entities on enter in case they somehow died (without player's help)
-                                RestrictionsHelper.checkForPersistentEntitiesFromSource(startWithRestrictions.getStructureRestrictionInstance(), world, start);
-                            }
-                            else {
-                                FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
+                                    // checks for persistent entities on enter in case they somehow died (without player's help)
+                                    RestrictionsHelper.checkForPersistentEntitiesFromSource(startWithRestrictions.getStructureRestrictionInstance(), world, start);
+                                }
+                                else {
+                                    FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
+                                }
                             }
                         }
                     }
@@ -97,7 +99,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
         ServerPlayNetworking.send(((ServerPlayerEntity) (Object) this), ModPackets.AFFECT_BY_STRUCTURE, buf);
     }
 
-    public StructureStart getStructureStart(){
+    public @Nullable StructureStart getStructureStart(){
         return this.currentStructure;
     }
 }

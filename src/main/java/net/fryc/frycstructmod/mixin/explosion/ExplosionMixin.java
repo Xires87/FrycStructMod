@@ -43,7 +43,7 @@ abstract class ExplosionMixin implements HoldsStructureStart {
     }
 
 
-    public StructureStart getStructureStart() {
+    public @Nullable StructureStart getStructureStart() {
         return this.currentStructure;
     }
 }
