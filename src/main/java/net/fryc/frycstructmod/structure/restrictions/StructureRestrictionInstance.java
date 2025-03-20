@@ -47,6 +47,10 @@ public class StructureRestrictionInstance {
         });
     }
 
+    public void disableRestriction(AbstractStructureRestriction restriction){
+        this.getDisabledRestrictions().add(restriction);
+    }
+
     private boolean shouldDisableRestriction(AbstractStructureRestriction restriction){
         if(restriction.getRestrictionSource().isShared()){
             return this.getCurrentSharedPower() < 1;

@@ -35,11 +35,6 @@
         "type": "blockBreak",
         "entry_id": "minecraft:oak_log",
         "strength": 1
-      },
-      {
-        "type": "itemUseFinish",
-        "entry_id": "minecraft:cooked_porkchop",
-        "strength": 5
       }
     ]
   }

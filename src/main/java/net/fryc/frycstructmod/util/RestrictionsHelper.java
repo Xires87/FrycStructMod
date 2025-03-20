@@ -27,10 +27,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 
@@ -60,20 +57,40 @@ public class RestrictionsHelper {
     public static void checkForPersistentEntitiesFromSource(StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
         if(restrictionInstance != null){
             for(AbstractStructureRestriction restriction : restrictionInstance.getStructureRestrictions()){
-                for(SourceEntry<?> entry : restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
+                List<SourceEntry<?>> list = restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
                     return entry instanceof PersistentMobSourceEntry;
-                }).toList()){
+                }).toList();
+                boolean shouldDisable = !list.isEmpty();
+                for(SourceEntry<?> entry : list){
                     Optional<EntityType<?>> type = EntityType.get(((PersistentMobSourceEntry) entry).getSourceId().toString());
                     if(type.isPresent()){
                         if(RestrictionsHelper.findPersistentMobInStructure(world, start, type.get(), ((PersistentMobSourceEntry) entry).shouldForcePersistent())){
-                            return;
+                            shouldDisable = false;
+                            break;
                         }
                     }
                 }
+
+                if(shouldDisable){
+                    restrictionInstance.disableRestriction(restriction);
+                }
             }
 
-            ((HasRestrictions) (Object) start).setActiveRestrictions(false);
+            tryToRemoveRestrictionsFromStructure(start, restrictionInstance);
         }
+    }
+
+    /**
+     *  Returns true after removing restrictions from structure
+     */
+    public static boolean tryToRemoveRestrictionsFromStructure(StructureStart start, StructureRestrictionInstance restrictionInstance){
+        if(!restrictionInstance.isActive()){
+            ((HasRestrictions) (Object) start).setActiveRestrictions(false);
+
+            return true;
+        }
+
+        return false;
     }
 
     public static void executeIfHasStructureOrElse(ServerWorld world, BlockPos pos, Consumer<Structure> presentAction, Runnable elseAction){

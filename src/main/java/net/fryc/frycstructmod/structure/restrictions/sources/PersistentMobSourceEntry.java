@@ -1,5 +1,6 @@
 package net.fryc.frycstructmod.structure.restrictions.sources;
 
+import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.entity.LivingEntity;
@@ -24,14 +25,16 @@ public class PersistentMobSourceEntry extends LivingEntitySourceEntry {
         if(source instanceof MobEntity mob){
             if(!this.shouldForcePersistent() || (mob.isPersistent() || mob.cannotDespawn())){
                 if(super.affectOwner(structureStart, source, player)){
+                    StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
                     if(!this.shouldCheckForOtherPersistentEntities()){
                         if(!RestrictionsHelper.findPersistentMobInStructure(mob.getWorld(), structureStart, mob.getType(), this.shouldForcePersistent())){
-                            // TODO
+                            instance.updateDisabledRestrictions();
+                            RestrictionsHelper.tryToRemoveRestrictionsFromStructure(structureStart, instance);
                         }
                     }
                     else if(!source.getWorld().isClient()){
                         RestrictionsHelper.checkForPersistentEntitiesFromSource(
-                                ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance(),
+                                instance,
                                 ((ServerWorld) source.getWorld()),
                                 structureStart
                         );
