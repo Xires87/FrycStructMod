@@ -3,13 +3,15 @@ package net.fryc.frycstructmod.mixin.entity;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Attackable;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
@@ -21,9 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 @Mixin(LivingEntity.class)
 abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffectedByStructure {
@@ -41,13 +41,13 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
             if(((LivingEntity)(Object)this) instanceof MobEntity mob){
                 if(mob.isPersistent() || mob.cannotDespawn()){
                     if(mob.getPrimeAdversary() == null || !mob.getPrimeAdversary().isPlayer()){
-                        RestrictionsHelper.executeIfHasStructure(((ServerWorld) mob.getWorld()), mob.getBlockPos(), structure -> {
+                        ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) mob.getWorld()), mob.getBlockPos(), structure -> {
 
                             StructureStart start = ((ServerWorld) mob.getWorld()).getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
                             HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
 
                             if(startWithRestrictions.hasActiveRestrictions()){
-                                RestrictionsHelper.checkForPersistentEntitiesFromSource(
+                                ServerRestrictionsHelper.checkForPersistentEntitiesFromSource(
                                         startWithRestrictions.getStructureRestrictionInstance(),
                                         ((ServerWorld) mob.getWorld()),
                                         start
@@ -64,7 +64,7 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
     @Inject(method = "canHaveStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;)Z", at = @At("HEAD"), cancellable = true)
     private void makeEntitiesImmune(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> ret) {
         if(!this.getWorld().isClient()){
-            RestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
+            ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
                 Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByType(
                         "status_effect", this.getWorld().getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure)
                 );

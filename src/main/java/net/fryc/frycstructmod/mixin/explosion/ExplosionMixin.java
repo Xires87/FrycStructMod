@@ -1,6 +1,6 @@
 package net.fryc.frycstructmod.mixin.explosion;
 
-import net.fryc.frycstructmod.util.RestrictionsHelper;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
@@ -36,7 +36,7 @@ abstract class ExplosionMixin implements HoldsStructureStart {
 
         if(!world.isClient()){
             BlockPos pos = BlockPos.ofFloored(x, y, z);
-            RestrictionsHelper.executeIfHasStructure(((ServerWorld) world), pos, structure -> {
+            ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) world), pos, structure -> {
                 this.currentStructure = ((ServerWorld) world).getStructureAccessor().getStructureAt(pos, structure);
             });
         }

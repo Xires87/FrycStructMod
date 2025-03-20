@@ -1,6 +1,6 @@
 package net.fryc.frycstructmod.mixin.block;
 
-import net.fryc.frycstructmod.util.RestrictionsHelper;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FireBlock;
@@ -22,7 +22,7 @@ abstract class FireBlockMixin {
                 "Lnet/minecraft/util/math/random/Random;" +
             ")V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;scheduleBlockTick(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V", shift = At.Shift.AFTER), cancellable = true)
     private void removeFireBlockTicksInStructures(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo info){
-        RestrictionsHelper.executeIfHasStructure(world, pos, structure -> {
+        ServerRestrictionsHelper.executeIfHasStructure(world, pos, structure -> {
             HasRestrictions start = ((HasRestrictions) (Object) world.getStructureAccessor().getStructureAt(pos, structure));
             if(start.hasActiveRestrictions()){
                 if(start.getStructureRestrictionInstance() != null){

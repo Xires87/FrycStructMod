@@ -29,7 +29,8 @@ abstract class PlayerEntityMixin extends LivingEntity {
     @ModifyReturnValue(method = "getBlockBreakingSpeed(Lnet/minecraft/block/BlockState;)F", at = @At("RETURN"))
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
-        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfAffectsPlayer("default", ((PlayerEntity)(Object) this));
+        // TODO musze na serwerze sprawdzic czy dezaktywowane i networkingiem wyslac info
+        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("default", this);
         return optional.map(abstractStructureRestriction -> ((DefaultStructureRestriction) abstractStructureRestriction).modifyBlockBreakingSpeedWhenNeeded(
                 original, block, ((PlayerEntity) (Object) this)
         )).orElse(original);

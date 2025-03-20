@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.network.ModPackets;
-import net.fryc.frycstructmod.util.RestrictionsHelper;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
@@ -42,7 +42,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
 
         if(--this.delay < 1){
             ServerWorld world = ((ServerWorld) this.getWorld());
-            RestrictionsHelper.executeIfHasStructureOrElse(world, this.getBlockPos(), structure -> {
+            ServerRestrictionsHelper.executeIfHasStructureOrElse(world, this.getBlockPos(), structure -> {
 
                 StructureStart start = world.getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
                 HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
@@ -55,7 +55,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                     // second check, because createStructureRestrictionInstance([...]); can disable restrictions
                     if(startWithRestrictions.hasActiveRestrictions()){
                         if(start != this.currentStructure) {
-                            if(!RestrictionsHelper.tryToRemoveRestrictionsFromStructure(start, startWithRestrictions.getStructureRestrictionInstance())){
+                            if(!ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(start, startWithRestrictions.getStructureRestrictionInstance())){
                                 Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
                                 if(id != null){
                                     this.currentStructure = start;
@@ -63,7 +63,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                                     this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
 
                                     // checks for persistent entities on enter in case they somehow died (without player's help)
-                                    RestrictionsHelper.checkForPersistentEntitiesFromSource(startWithRestrictions.getStructureRestrictionInstance(), world, start);
+                                    ServerRestrictionsHelper.checkForPersistentEntitiesFromSource(startWithRestrictions.getStructureRestrictionInstance(), world, start);
                                 }
                                 else {
                                     FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());

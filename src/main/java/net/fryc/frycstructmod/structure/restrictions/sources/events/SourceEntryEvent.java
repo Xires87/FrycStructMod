@@ -4,6 +4,7 @@ import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestrictio
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.block.BlockState;
@@ -31,7 +32,7 @@ public class SourceEntryEvent<T> implements Event {
                         return entry.getEvent().equals(this);
                     }).forEach(entry -> {
                         if(((SourceEntry<T>) entry).affectOwner(world, ((HoldsStructureStart) player).getStructureStart(), source, player)){
-                            RestrictionsHelper.spawnSoulParticlesServerSided(world, pos);
+                            ServerRestrictionsHelper.spawnSoulParticlesServerSided(world, pos);
                         }
                     });
                 });

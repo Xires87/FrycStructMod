@@ -3,7 +3,7 @@ package net.fryc.frycstructmod.structure.restrictions.sources;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.Event;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
-import net.fryc.frycstructmod.util.RestrictionsHelper;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -24,7 +24,7 @@ public class ItemStackSourceEntry extends AbstractSourceEntry<ItemStack> {
             if(instance != null){
                 if(instance.decreaseCurrentPower(this.sourceStrength, this)){
                     instance.updateDisabledRestrictions();
-                    RestrictionsHelper.tryToRemoveRestrictionsFromStructure(structureStart, instance);
+                    ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(structureStart, instance);
                 }
 
                 return true;
