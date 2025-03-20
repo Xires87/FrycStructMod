@@ -1,13 +1,17 @@
 package net.fryc.frycstructmod.mixin.entity;
 
+import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
+import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
-import net.minecraft.entity.Attackable;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.world.World;
@@ -15,9 +19,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Mixin(LivingEntity.class)
-abstract class LivingEntityMixin extends Entity implements Attackable {
+abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffectedByStructure {
+
+    private String affectedByStructure = "";
+    private final Set<String> restrictionsImmuneTo = new HashSet<>();
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -47,5 +59,45 @@ abstract class LivingEntityMixin extends Entity implements Attackable {
                 }
             }
         }
+    }
+// TODO zamiast dawac odpornosc na efekty, to shadowowac je (beda na szaro, ich czas nie bedzie mijal i nie beda dzialaly dopoki nie wyjdzie sie ze struktury)
+
+    @Inject(method = "canHaveStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;)Z", at = @At("HEAD"), cancellable = true)
+    private void makeEntitiesImmune(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> ret) {
+        if(!this.getWorld().isClient()){
+            RestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
+                Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByType(
+                        "status_effect", this.getWorld().getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure)
+                );
+                // TODO to zawsze bedzie dzialalo bo zle jest zrobiona odpornosc na restrykcje ( i nie sprawdzam tu instancji tylko czy jestem w wiosce)
+                optional.ifPresent(restriction -> {
+                    if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
+                        if(effectRestriction.shouldMakeEntityImmune(this, effect.getEffectType())){
+                            ret.setReturnValue(false);// TODO podmienic to na shadowowanie efektow
+                        }
+                    }
+                });
+            });
+        }
+    }
+
+    public boolean isAffectedByStructure() {
+        return !this.affectedByStructure.isEmpty();
+    }
+
+    public void setAffectedByStructure(String affected) {
+        this.affectedByStructure = affected;
+    }
+
+    public String getStructureId(){
+        return this.affectedByStructure;
+    }
+
+    public Set<String> getRestrictionsImmuneTo(){
+        return this.restrictionsImmuneTo;
+    }
+
+    public boolean shouldBeAffectedByRestriction(String restrictionType){
+        return !this.getRestrictionsImmuneTo().contains(restrictionType);
     }
 }

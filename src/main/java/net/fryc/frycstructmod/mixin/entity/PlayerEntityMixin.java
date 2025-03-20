@@ -5,7 +5,6 @@ import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestrictio
 import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
-import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -17,15 +16,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 @Mixin(PlayerEntity.class)
-abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedByStructure {
-
-    private String affectedByStructure = "";
-    private final Set<String> restrictionsImmuneTo = new HashSet<>();
+abstract class PlayerEntityMixin extends LivingEntity {
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -46,23 +40,4 @@ abstract class PlayerEntityMixin extends LivingEntity implements CanBeAffectedBy
         SourceEntryEvent.ON_MOB_KILL.triggerEvent(killedEntity, ((PlayerEntity)(Object)this), world, killedEntity.getBlockPos());
     }
 
-    public boolean isAffectedByStructure() {
-        return !this.affectedByStructure.isEmpty();
-    }
-
-    public void setAffectedByStructure(String affected) {
-        this.affectedByStructure = affected;
-    }
-
-    public String getStructureId(){
-        return this.affectedByStructure;
-    }
-
-    public Set<String> getRestrictionsImmuneTo(){
-        return this.restrictionsImmuneTo;
-    }
-
-    public boolean shouldBeAffectedByRestriction(String restrictionType){
-        return !this.getRestrictionsImmuneTo().contains(restrictionType);
-    }
 }
