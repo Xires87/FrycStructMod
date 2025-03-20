@@ -1,7 +1,9 @@
 package net.fryc.frycstructmod.structure.restrictions;
 
 import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import oshi.util.tuples.Pair;
 
@@ -30,6 +32,18 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
         this.persistentEffects = persistentEffects;
     }
 // TODO zarejestrowac to i wstawic odpalanie w odpowiednim miejscu
+
+    public boolean shouldMakeEntityImmune(Entity entity, StatusEffect effect){
+        return this.shouldAffectEntity(entity) && !this.shouldAllowEffect(effect);
+    }
+
+    public boolean shouldAffectEntity(Entity entity){
+        return entity instanceof LivingEntity && this.shouldAffectAllEntities() != this.getExcludedEntities().contains(entity.getType());
+    }
+
+    public boolean shouldAllowEffect(StatusEffect effect){
+        return this.shouldAllowAllEffects() != this.getExcludedEffects().contains(effect);
+    }
 
     public Set<StatusEffect> getExcludedEffects() {
         return excludedEffects;

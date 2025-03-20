@@ -33,7 +33,7 @@ public class BlockStateSourceEntry extends AbstractSourceEntry<BlockState> {
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
                 if(instance.decreaseCurrentPower(this.sourceStrength, this)){
-                    ((HasRestrictions) (Object) structureStart).tryToDisableRestrictionsAndUpdateRestrictionImmunity(instance, player);
+                    // TODO
                 }
 
                 return true;

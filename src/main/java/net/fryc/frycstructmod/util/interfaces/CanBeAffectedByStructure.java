@@ -3,8 +3,6 @@ package net.fryc.frycstructmod.util.interfaces;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
-
 public interface CanBeAffectedByStructure {
 
     boolean isAffectedByStructure();
@@ -13,7 +11,5 @@ public interface CanBeAffectedByStructure {
 
     String getStructureId();
 
-    Set<String> getRestrictionsImmuneTo();
-
-    boolean shouldBeAffectedByRestriction(String restrictionType);
+    // TODO podmienic zeby instancja przechowywala wylaczone restrykcje a nie gracz bo to nie wypali
 }

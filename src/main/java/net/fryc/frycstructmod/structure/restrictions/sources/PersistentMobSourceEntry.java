@@ -26,10 +26,7 @@ public class PersistentMobSourceEntry extends LivingEntitySourceEntry {
                 if(super.affectOwner(structureStart, source, player)){
                     if(!this.shouldCheckForOtherPersistentEntities()){
                         if(!RestrictionsHelper.findPersistentMobInStructure(mob.getWorld(), structureStart, mob.getType(), this.shouldForcePersistent())){
-                            ((HasRestrictions) (Object) structureStart).tryToDisableRestrictionsAndUpdateRestrictionImmunity(
-                                    ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance(),
-                                    player
-                            );
+                            // TODO
                         }
                     }
                     else if(!source.getWorld().isClient()){

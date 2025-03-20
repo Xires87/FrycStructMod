@@ -23,7 +23,7 @@ public class LivingEntitySourceEntry extends AbstractSourceEntry<LivingEntity>{
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
                 if(instance.decreaseCurrentPower(this.sourceStrength, this)){
-                    ((HasRestrictions) (Object) structureStart).tryToDisableRestrictionsAndUpdateRestrictionImmunity(instance, player);
+                    // TODO
                 }
 
                 return true;

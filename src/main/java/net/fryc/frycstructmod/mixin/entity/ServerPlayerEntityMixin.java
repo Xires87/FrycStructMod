@@ -58,7 +58,6 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                             Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
                             if(id != null){
                                 this.currentStructure = start;
-                                this.getRestrictionsImmuneTo().addAll(startWithRestrictions.getStructureRestrictionInstance().getDisabledRestrictionsIds());
                                 this.setAffectedByStructureServerAndClient(id.toString());
                                 this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
 
@@ -87,7 +86,6 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
             this.getWorld().getChunk(this.currentStructure.getPos().x, this.currentStructure.getPos().z).setNeedsSaving(true);
             this.sendMessage(Text.of("Wychodze"));
             this.currentStructure = null;
-            this.getRestrictionsImmuneTo().clear();
             this.setAffectedByStructureServerAndClient("");
         }
     }
@@ -96,10 +94,6 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
         this.setAffectedByStructure(affected);
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString(affected);
-        buf.writeInt(this.getRestrictionsImmuneTo().size());
-        for(String str : this.getRestrictionsImmuneTo()){
-            buf.writeString(str);
-        }
         ServerPlayNetworking.send(((ServerPlayerEntity) (Object) this), ModPackets.AFFECT_BY_STRUCTURE, buf);
     }
 

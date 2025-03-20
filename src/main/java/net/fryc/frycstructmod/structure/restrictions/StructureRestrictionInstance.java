@@ -2,7 +2,6 @@ package net.fryc.frycstructmod.structure.restrictions;
 
 import com.google.common.collect.ImmutableSet;
 import net.fryc.frycstructmod.FrycStructMod;
-import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 
@@ -12,56 +11,48 @@ public class StructureRestrictionInstance {
 // TODO zrobic zeby sourcey byly shared albo separate i jesli shared to trzeba okreslic czy nalezy dodawac te wartosci czy jak
     private final Set<AbstractStructureRestriction> structureRestrictions;
     private int currentSharedPower;
+    private final String structureId;
 
     private final Map<AbstractStructureRestriction, Integer> currentSeperatePowers;
+
+    private final Set<AbstractStructureRestriction> disabledRestrictions;
 
     public StructureRestrictionInstance(Collection<AbstractStructureRestriction> structureRestrictions){
         this(convertCollectionToSet(structureRestrictions));
     }
-
+// TODO nie dziala wylaczanie osobno restrykcji (jedna wysiadzie to druga tez)
     public StructureRestrictionInstance(Set<AbstractStructureRestriction> structureRestrictions){
+        if(structureRestrictions.isEmpty()){
+            throw new IllegalArgumentException("Cannot create StructureRestrictionInstance with empty collection!");
+        }
+
         this.structureRestrictions = structureRestrictions;
         this.currentSharedPower = calculateSharedPower(structureRestrictions);
         this.currentSeperatePowers = createSeparatePowers(structureRestrictions);
+        this.disabledRestrictions = new HashSet<>();
+        this.structureId = structureRestrictions.stream().findAny().get().getStructureId();
     }
 
-
-    public Set<AbstractStructureRestriction> getStructureRestrictions(){
-        return this.structureRestrictions;
-    }
-
-    public int getCurrentSharedPower(){
-        return this.currentSharedPower;
-    }
-
-    public void setCurrentSharedPower(int power){
-        this.currentSharedPower = power;
-    }
-
-    public Map<AbstractStructureRestriction, Integer> getCurrentSeperatePowers() {
-        return currentSeperatePowers;
+    public boolean isActive(){
+        return this.getDisabledRestrictions().size() < this.getStructureRestrictions().size();
     }
 
     public boolean isRestrictionDisabled(AbstractStructureRestriction restriction){
+        return this.getDisabledRestrictions().contains(restriction);
+    }
+
+    public void updateDisabledRestrictions(){
+        this.getStructureRestrictions().stream().filter(this::shouldDisableRestriction).forEach(restriction -> {
+            this.getDisabledRestrictions().add(restriction);
+        });
+    }
+
+    private boolean shouldDisableRestriction(AbstractStructureRestriction restriction){
         if(restriction.getRestrictionSource().isShared()){
             return this.getCurrentSharedPower() < 1;
         }
 
         return this.getCurrentSeperatePowers().get(restriction) == null || this.getCurrentSeperatePowers().get(restriction) < 1;
-    }
-// TODO zapisac w instancji id struktury zebym nie musial w rejestracji szukac
-    public Set<String> getDisabledRestrictionsIds(){
-        HashSet<String> set = new HashSet<>();
-        this.getStructureRestrictions().stream().findAny().ifPresent(id -> {
-            Set<Map.Entry<String, AbstractStructureRestriction>> entries = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(id.getStructureId()).entrySet();
-            this.getStructureRestrictions().stream().filter(this::isRestrictionDisabled).forEach(restriction -> {
-                entries.stream().filter(entry -> {
-                    return entry.getValue().equals(restriction);
-                }).forEach(entry -> set.add(entry.getKey()));
-            });
-        });
-
-        return set;
     }
 
     /**
@@ -87,6 +78,30 @@ public class StructureRestrictionInstance {
             FrycStructMod.LOGGER.error("Unable to decrease restriction's power, because restriction is null. This should never happen!");
             return false;
         }
+    }
+
+    public Set<AbstractStructureRestriction> getStructureRestrictions(){
+        return this.structureRestrictions;
+    }
+
+    public int getCurrentSharedPower(){
+        return this.currentSharedPower;
+    }
+
+    public void setCurrentSharedPower(int power){
+        this.currentSharedPower = power;
+    }
+
+    public String getStructureId(){
+        return this.structureId;
+    }
+
+    public Map<AbstractStructureRestriction, Integer> getCurrentSeperatePowers() {
+        return currentSeperatePowers;
+    }
+
+    public Set<AbstractStructureRestriction> getDisabledRestrictions(){
+        return this.disabledRestrictions;
     }
 
     private static int calculateSharedPower(Set<AbstractStructureRestriction> structureRestrictions){

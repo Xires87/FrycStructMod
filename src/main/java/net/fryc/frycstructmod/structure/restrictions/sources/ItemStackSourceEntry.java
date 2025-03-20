@@ -22,7 +22,7 @@ public class ItemStackSourceEntry extends AbstractSourceEntry<ItemStack> {
             StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
             if(instance != null){
                 if(instance.decreaseCurrentPower(this.sourceStrength, this)){
-                    ((HasRestrictions) (Object) structureStart).tryToDisableRestrictionsAndUpdateRestrictionImmunity(instance, player);
+                    // TODO
                 }
 
                 return true;

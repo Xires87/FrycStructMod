@@ -21,6 +21,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
@@ -98,6 +99,10 @@ public class RestrictionsHelper {
         }).findFirst();
     }
 
+    public static Optional<AbstractStructureRestriction> getRestrictionByType(String type, Identifier structureId){
+        return structureId != null ? getRestrictionByType(type, structureId.toString()) : Optional.empty();
+    }
+
     public static Optional<AbstractStructureRestriction> getRestrictionByType(String type, String structureId){
         HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(structureId);
         if(restrictions != null){
@@ -111,9 +116,9 @@ public class RestrictionsHelper {
 
     public static Optional<AbstractStructureRestriction> getRestrictionByTypeIfAffectsPlayer(String type, PlayerEntity player){
         if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-            if(((CanBeAffectedByStructure) player).shouldBeAffectedByRestriction(type)){
+            //if(((CanBeAffectedByStructure) player).shouldBeAffectedByRestriction(type)){
                 return getRestrictionByType(type, ((CanBeAffectedByStructure) player).getStructureId());
-            }
+            //}
         }
 
         return Optional.empty();

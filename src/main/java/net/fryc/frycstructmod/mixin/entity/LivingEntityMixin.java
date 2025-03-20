@@ -29,7 +29,6 @@ import java.util.Set;
 abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffectedByStructure {
 
     private String affectedByStructure = "";
-    private final Set<String> restrictionsImmuneTo = new HashSet<>();
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -93,11 +92,4 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
         return this.affectedByStructure;
     }
 
-    public Set<String> getRestrictionsImmuneTo(){
-        return this.restrictionsImmuneTo;
-    }
-
-    public boolean shouldBeAffectedByRestriction(String restrictionType){
-        return !this.getRestrictionsImmuneTo().contains(restrictionType);
-    }
 }

@@ -21,7 +21,7 @@
     }
   ],
   "source": {
-    "shared": true,
+    "shared": false,
     "power": 10,
     "entries": [
       {

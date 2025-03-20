@@ -111,26 +111,6 @@ abstract class StructureStartMixin implements HasRestrictions, PlayerLocator {
         }
     }
 
-    public void tryToDisableRestrictionsAndUpdateRestrictionImmunity(StructureRestrictionInstance instance, PlayerEntity player){
-        Set<String> disabledRestrictions = instance.getDisabledRestrictionsIds();
-
-        if(!this.tryToDisableRestrictions(instance.getDisabledRestrictionsIds(), disabledRestrictions)){
-            this.getPlayersInStructure(player.getWorld()).forEach(playerEntity -> {
-                ((CanBeAffectedByStructure) playerEntity).getRestrictionsImmuneTo().addAll(disabledRestrictions);
-            });
-        }
-    }
-
-    public boolean tryToDisableRestrictions(Set<String> instanceRestrictions, Set<String> disabledRestrictions){
-        if(disabledRestrictions.size() >= instanceRestrictions.size()){
-            this.setActiveRestrictions(false);
-
-            return true;
-        }
-
-        return false;
-    }
-
     public List<PlayerEntity> getPlayersInStructure(World world){
         return world.getEntitiesByType(EntityType.PLAYER, Box.from(((StructureStart)(Object)this).getBoundingBox()), LivingEntity::isAlive);
     }
