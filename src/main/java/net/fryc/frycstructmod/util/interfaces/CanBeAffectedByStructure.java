@@ -11,5 +11,4 @@ public interface CanBeAffectedByStructure {
 
     String getStructureId();
 
-    // TODO podmienic zeby instancja przechowywala wylaczone restrykcje a nie gracz bo to nie wypali
 }
