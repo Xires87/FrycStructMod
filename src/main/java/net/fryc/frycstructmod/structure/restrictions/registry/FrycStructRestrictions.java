@@ -2,19 +2,26 @@ package net.fryc.frycstructmod.structure.restrictions.registry;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.sources.*;
+import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.sources.BlockStateSourceEntry;
+import net.fryc.frycstructmod.structure.restrictions.sources.ItemStackSourceEntry;
+import net.fryc.frycstructmod.structure.restrictions.sources.LivingEntitySourceEntry;
+import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.util.FrycJsonHelper;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import oshi.util.tuples.Pair;
+
+import java.util.Map;
 
 public class FrycStructRestrictions {
-// TODO cos tu pomieszalem i moge to lepiej zrobic ale leb mi teraz paruje i nie moge sie kapnac jak to zrobic
+
     public static void registerRestrictionTypes(){
         RestrictionRegistries.registerRestrictionType("default", ((jsonObject, id) -> {
             String identifier = JsonHelper.getString(jsonObject, "structure_id");
@@ -32,27 +39,31 @@ public class FrycStructRestrictions {
             boolean disallowPlacingIndestructibleBlocks = JsonHelper.getBoolean(miningObject, "always_disallow_when_indestructible", true);
             ImmutableSet<Block> placingExceptions = FrycJsonHelper.getExcludedBlocks(placeExcept, id);
 
-            JsonObject sourceObject = JsonHelper.getObject(jsonObject, "source");
-            int power = JsonHelper.getInt(sourceObject, "power");
-            boolean shared = JsonHelper.getBoolean(sourceObject, "shared", false);
-
-            RestrictionSource.Builder builder = RestrictionSource.builder().setPower(power).setShared(shared);
-
-            JsonArray sourceEntries = JsonHelper.getArray(sourceObject, "entries");
-            for(JsonElement element : sourceEntries){
-                try{
-                    JsonObject sourceTypeObject = JsonHelper.asObject(element, "SourceTypeObject");
-                    builder.putSourceEntry(
-                            RestrictionRegistries.SOURCE_ENTRY_TYPES.get(JsonHelper.getString(sourceTypeObject, "type")).loadFromJson(sourceTypeObject, id)
-                    );
-                } catch (Exception e) {
-                    FrycStructMod.LOGGER.error("Error occurred while loading source entries from the following file: " + id.toString(), e);
-                }
-            }
-
             RestrictionRegistries.registerStructureRestriction(identifier, "default", new DefaultStructureRestriction(
                     identifier, allowMining, allowMiningPlayerBlocks, miningSpeedMultiplier, miningExceptions, allowPlacing,
-                    disallowPlacingIndestructibleBlocks, placingExceptions, builder.build()
+                    disallowPlacingIndestructibleBlocks, placingExceptions, FrycJsonHelper.createRestrictionSource(jsonObject, id)
+            ));
+        }));
+
+        RestrictionRegistries.registerRestrictionType("status_effect", ((jsonObject, id) -> {
+            String identifier = JsonHelper.getString(jsonObject, "structure_id");
+            JsonObject entitiesObject = JsonHelper.getObject(jsonObject, "entities_affected");
+            JsonObject allowedEffectsObject = JsonHelper.getObject(jsonObject, "allowed_effects");
+
+            JsonArray entityExcept = JsonHelper.getArray(entitiesObject, "except", new JsonArray());
+            boolean affectAll = JsonHelper.getBoolean(entitiesObject, "affect_all", false);
+            ImmutableSet<EntityType<?>> entityExceptions = FrycJsonHelper.getExcludedEntities(entityExcept, id);
+
+            JsonArray allowedStatusExcept = JsonHelper.getArray(allowedEffectsObject, "except", new JsonArray());
+            boolean allowEffects = JsonHelper.getBoolean(allowedEffectsObject, "allowed", true);
+            ImmutableSet<StatusEffect> allowedEffectExceptions = FrycJsonHelper.getExcludedStatusEffects(allowedStatusExcept, id);
+
+            JsonArray persistentEffectsArray = JsonHelper.getArray(jsonObject, "persistent_effects");
+            Map<StatusEffect, Pair<Integer, Integer>> persistentEffectsMap = FrycJsonHelper.getPersistentEffectsMap(persistentEffectsArray, id);
+
+            RestrictionRegistries.registerStructureRestriction(identifier, "status_effect", new StatusEffectStructureRestriction(
+                    identifier, affectAll, entityExceptions, allowEffects, allowedEffectExceptions,
+                    persistentEffectsMap, FrycJsonHelper.createRestrictionSource(jsonObject, id)
             ));
         }));
     }

@@ -1,7 +1,7 @@
 package net.fryc.frycstructmod.structure.restrictions;
 
 import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import oshi.util.tuples.Pair;
 
@@ -14,11 +14,11 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
     private final boolean allowAllEffects;
 
     private final Set<StatusEffect> excludedEffects;
-    private final Set<LivingEntity> excludedEntities;
+    private final Set<EntityType<?>> excludedEntities;
     private final Map<StatusEffect, Pair<Integer, Integer>> persistentEffects;
 
 
-    public StatusEffectStructureRestriction(String structureId, boolean affectAllEntities, Set<LivingEntity> excludedEntities,
+    public StatusEffectStructureRestriction(String structureId, boolean affectAllEntities, Set<EntityType<?>> excludedEntities,
                                             boolean allowAllEffects, Set<StatusEffect> excludedEffects,
                                             Map<StatusEffect, Pair<Integer, Integer>> persistentEffects, RestrictionSource restrictionSource) {
 
@@ -43,7 +43,7 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
         return allowAllEffects;
     }
 
-    public Set<LivingEntity> getExcludedEntities() {
+    public Set<EntityType<?>> getExcludedEntities() {
         return excludedEntities;
     }
 
