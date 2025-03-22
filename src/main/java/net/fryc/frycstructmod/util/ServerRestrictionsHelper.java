@@ -12,12 +12,15 @@ import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
 
@@ -97,4 +100,48 @@ public class ServerRestrictionsHelper {
     public static void executeIfHasStructure(ServerWorld world, BlockPos pos, Consumer<Structure> action){
         executeIfHasStructureOrElse(world, pos, action, () -> {});
     }
+
+    public static void onStructureStartLoadFromNbt(StructureStart start, StructureContext context, NbtCompound nbt, long seed){
+        if(nbt.contains("structureRestrictionActive")){
+            if(start != null){
+                if(!start.equals(StructureStart.DEFAULT)){
+                    HasRestrictions str = ((HasRestrictions)(Object) start);
+                    boolean active = nbt.getBoolean("structureRestrictionActive");
+
+                    str.setActiveRestrictions(active);
+                    if(active){
+                        if(nbt.contains("structureRestrictionInstancePower")){
+                            str.createStructureRestrictionInstance(context.registryManager());
+                            if(str.getStructureRestrictionInstance() != null){
+                                str.getStructureRestrictionInstance().setCurrentSharedPower(nbt.getInt("structureRestrictionInstancePower"));
+                                for (Map.Entry<AbstractStructureRestriction, Integer> entry : str.getStructureRestrictionInstance().getCurrentSeperatePowers().entrySet()) {
+                                    if (nbt.contains("structureRestrictionInstancePower" + entry.getKey().getRestrictionType())) {
+                                        str.getStructureRestrictionInstance().getCurrentSeperatePowers().put(entry.getKey(), nbt.getInt("structureRestrictionInstancePower" + entry.getKey().getRestrictionType()));
+                                    }
+                                }
+
+                                str.getStructureRestrictionInstance().updateDisabledRestrictions();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static void onStructureStartSaveToNbt(HasRestrictions structureStart, NbtCompound nbtCompound, StructureContext context, ChunkPos chunkPos){
+        if(nbtCompound.contains("Children")){
+            nbtCompound.putBoolean("structureRestrictionActive", structureStart.hasActiveRestrictions());
+            if(structureStart.getStructureRestrictionInstance() != null){
+                nbtCompound.putInt("structureRestrictionInstancePower", structureStart.getStructureRestrictionInstance().getCurrentSharedPower());
+                Map<AbstractStructureRestriction, Integer> map = structureStart.getStructureRestrictionInstance().getCurrentSeperatePowers();
+                if(!map.isEmpty()){
+                    map.forEach((res, power) -> {
+                        nbtCompound.putInt("structureRestrictionInstancePower" + res.getRestrictionType(), power);
+                    });
+                }
+            }
+        }
+    }
+
 }

@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.PlayerLocator;
@@ -49,48 +50,14 @@ abstract class StructureStartMixin implements HasRestrictions, PlayerLocator {
 
     @ModifyReturnValue(method = "toNbt(Lnet/minecraft/structure/StructureContext;Lnet/minecraft/util/math/ChunkPos;)Lnet/minecraft/nbt/NbtCompound;", at = @At("RETURN"))
     private NbtCompound saveRestrictionsActiveToNbt(NbtCompound original, StructureContext context, ChunkPos chunkPos) {
-        if(original.contains("Children")){
-            original.putBoolean("structureRestrictionActive", this.hasActiveRestrictions());
-            if(this.getStructureRestrictionInstance() != null){
-                original.putInt("structureRestrictionInstancePower", this.getStructureRestrictionInstance().getCurrentSharedPower());
-                Map<AbstractStructureRestriction, Integer> map = this.getStructureRestrictionInstance().getCurrentSeperatePowers();
-                if(!map.isEmpty()){
-                    map.forEach((res, power) -> {
-                        original.putInt("structureRestrictionInstancePower" + res.getRestrictionType(), power);
-                    });
-                }
-            }
-        }
+        ServerRestrictionsHelper.onStructureStartSaveToNbt(this, original, context, chunkPos);
+
         return original;
     }
 
     @ModifyReturnValue(method = "fromNbt(Lnet/minecraft/structure/StructureContext;Lnet/minecraft/nbt/NbtCompound;J)Lnet/minecraft/structure/StructureStart;", at = @At("RETURN"))
     private static StructureStart loadRestrictionsActiveFromNbt(StructureStart original, StructureContext context, NbtCompound nbt, long seed) {
-        if(nbt.contains("structureRestrictionActive")){
-            if(original != null){
-                if(!original.equals(StructureStart.DEFAULT)){
-                    HasRestrictions str = ((HasRestrictions)(Object) original);
-                    boolean active = nbt.getBoolean("structureRestrictionActive");
-
-                    str.setActiveRestrictions(active);
-                    if(active){
-                        if(nbt.contains("structureRestrictionInstancePower")){
-                            str.createStructureRestrictionInstance(context.registryManager());
-                            if(str.getStructureRestrictionInstance() != null){
-                                str.getStructureRestrictionInstance().setCurrentSharedPower(nbt.getInt("structureRestrictionInstancePower"));
-                                for (Map.Entry<AbstractStructureRestriction, Integer> entry : str.getStructureRestrictionInstance().getCurrentSeperatePowers().entrySet()) {
-                                    if (nbt.contains("structureRestrictionInstancePower" + entry.getKey().getRestrictionType())) {
-                                        str.getStructureRestrictionInstance().getCurrentSeperatePowers().put(entry.getKey(), nbt.getInt("structureRestrictionInstancePower" + entry.getKey().getRestrictionType()));
-                                    }
-                                }
-
-                                str.getStructureRestrictionInstance().updateDisabledRestrictions();
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        ServerRestrictionsHelper.onStructureStartLoadFromNbt(original, context, nbt, seed);
 
         return original;
     }
