@@ -1,11 +1,10 @@
 package net.fryc.frycstructmod.structure.restrictions.sources.events;
 
-import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
+import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
-import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
+import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
@@ -13,8 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.HashMap;
 
 public class SourceEntryEvent<T> implements Event {
 
@@ -25,9 +22,9 @@ public class SourceEntryEvent<T> implements Event {
 
     public void triggerEvent(T source, PlayerEntity player, ServerWorld world, BlockPos pos){
         if(((CanBeAffectedByStructure) player).isAffectedByStructure()){
-            HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(((CanBeAffectedByStructure) player).getStructureId());
-            if(restrictions != null){
-                restrictions.values().forEach(res -> {
+            StructureRestrictionInstance instance = ((HasRestrictions)(Object) ((HoldsStructureStart) player).getStructureStart()).getStructureRestrictionInstance();
+            if(instance != null){
+                instance.getActiveRestrictions().forEach(res -> {
                     res.getRestrictionSource().getEntries().stream().filter(entry -> {
                         return entry.getEvent().equals(this);
                     }).forEach(entry -> {

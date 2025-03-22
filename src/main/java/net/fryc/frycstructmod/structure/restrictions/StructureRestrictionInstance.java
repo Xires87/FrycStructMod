@@ -20,7 +20,7 @@ public class StructureRestrictionInstance {
     public StructureRestrictionInstance(Collection<AbstractStructureRestriction> structureRestrictions){
         this(convertCollectionToSet(structureRestrictions));
     }
-// TODO nie dziala wylaczanie osobno restrykcji (jedna wysiadzie to druga tez)
+// TODO albo dzialaja wszystkie restrykcje, albo zadna (maja dzialac te ktore maja wystarczajaco powera)
     public StructureRestrictionInstance(Set<AbstractStructureRestriction> structureRestrictions){
         if(structureRestrictions.isEmpty()){
             throw new IllegalArgumentException("Cannot create StructureRestrictionInstance with empty collection!");
@@ -82,6 +82,15 @@ public class StructureRestrictionInstance {
             FrycStructMod.LOGGER.error("Unable to decrease restriction's power, because restriction is null. This should never happen!");
             return false;
         }
+    }
+
+    public Set<AbstractStructureRestriction> getActiveRestrictions(){
+        Set<AbstractStructureRestriction> set = new HashSet<>();
+        this.getStructureRestrictions().stream().filter(res -> {
+            return !this.isRestrictionDisabled(res);
+        }).forEach(set::add);
+
+        return set;
     }
 
     public Set<AbstractStructureRestriction> getStructureRestrictions(){
