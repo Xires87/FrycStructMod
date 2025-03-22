@@ -24,7 +24,7 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
                                             boolean allowAllEffects, Set<StatusEffect> excludedEffects,
                                             Map<StatusEffect, Pair<Integer, Integer>> persistentEffects, RestrictionSource restrictionSource) {
 
-        super(structureId, restrictionSource);
+        super(structureId, "status_effect", restrictionSource);
         this.affectAllEntities = affectAllEntities;
         this.allowAllEffects = allowAllEffects;
         this.excludedEffects = excludedEffects;

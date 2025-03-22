@@ -25,18 +25,17 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Mixin(StructureStart.class)
 abstract class StructureStartMixin implements HasRestrictions, PlayerLocator {
 
-    private boolean restrictionsActive = false;// TODO zapisywanie separate powers do nbt
+    private boolean restrictionsActive = false;
 
     @Nullable
     private StructureRestrictionInstance structureRestrictionInstance = null;
@@ -54,6 +53,12 @@ abstract class StructureStartMixin implements HasRestrictions, PlayerLocator {
             original.putBoolean("structureRestrictionActive", this.hasActiveRestrictions());
             if(this.getStructureRestrictionInstance() != null){
                 original.putInt("structureRestrictionInstancePower", this.getStructureRestrictionInstance().getCurrentSharedPower());
+                Map<AbstractStructureRestriction, Integer> map = this.getStructureRestrictionInstance().getCurrentSeperatePowers();
+                if(!map.isEmpty()){
+                    map.forEach((res, power) -> {
+                        original.putInt("structureRestrictionInstancePower" + res.getRestrictionType(), power);
+                    });
+                }
             }
         }
         return original;
@@ -73,6 +78,13 @@ abstract class StructureStartMixin implements HasRestrictions, PlayerLocator {
                             str.createStructureRestrictionInstance(context.registryManager());
                             if(str.getStructureRestrictionInstance() != null){
                                 str.getStructureRestrictionInstance().setCurrentSharedPower(nbt.getInt("structureRestrictionInstancePower"));
+                                for (Map.Entry<AbstractStructureRestriction, Integer> entry : str.getStructureRestrictionInstance().getCurrentSeperatePowers().entrySet()) {
+                                    if (nbt.contains("structureRestrictionInstancePower" + entry.getKey().getRestrictionType())) {
+                                        str.getStructureRestrictionInstance().getCurrentSeperatePowers().put(entry.getKey(), nbt.getInt("structureRestrictionInstancePower" + entry.getKey().getRestrictionType()));
+                                    }
+                                }
+
+                                str.getStructureRestrictionInstance().updateDisabledRestrictions();
                             }
                         }
                     }

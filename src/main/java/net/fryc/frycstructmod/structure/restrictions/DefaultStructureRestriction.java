@@ -24,7 +24,7 @@ public class DefaultStructureRestriction extends AbstractStructureRestriction {
                                        Set<Block> miningExcludedBlocks, boolean allowPlacing, boolean alwaysDisallowPlacingIndestructibleBlocks,
                                        Set<Block> placingExcludedBlocks, RestrictionSource restrictionSource){
 
-        super(structureId, restrictionSource);
+        super(structureId, "default", restrictionSource);
         this.allowMining = allowMining;
         this.allowMiningPlayerBlocks = allowMiningPlayerBlocks;
         this.miningExcludedBlocks = miningExcludedBlocks;
