@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"StructureStartMixin",
+		"PlayerManagerMixin",
 		"block/BlockMixin",
 		"block/FireBlockMixin",
 		"item/BlockItemMixin",

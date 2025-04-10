@@ -34,6 +34,11 @@ public class AffectByStructureS2CPacket {
 
                 ((HoldsStructureRestrictionInstance) player).setStructureRestrictionInstance(instance);
                 instance.updateDisabledRestrictions();
+                /*
+                restrictions.forEach((key, value) -> {
+                    FrycStructMod.LOGGER.warn(key + " -> " + value.getStructureId());
+                });
+                 */
             }
             else {
                 ((HoldsStructureRestrictionInstance) player).setStructureRestrictionInstance(null);

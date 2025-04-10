@@ -29,7 +29,7 @@ abstract class PlayerEntityMixin extends LivingEntity {
     @ModifyReturnValue(method = "getBlockBreakingSpeed(Lnet/minecraft/block/BlockState;)F", at = @At("RETURN"))
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
-        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("default", this);// TODO mozliwe ze bede musial jakos synchronizowac zarejestrowane restrykcje (chyba ze sie same synchronizuja bo nwm)
+        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("default", this);
         if(optional.isPresent()){
             PlayerEntity dys = ((PlayerEntity) (Object) this);
             if(RestrictionsHelper.shouldPlayerBeAffectedByRestriction(optional.get(), dys)){

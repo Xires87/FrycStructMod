@@ -10,7 +10,11 @@ import java.util.HashMap;
 
 public class RestrictionRegistries {
 
-
+    /**
+     * Key - structure id
+     * <p>
+     * Value - map containing restrictions (key : type, value: restriction)
+     */
     public static final HashMap<String, HashMap<String, AbstractStructureRestriction>> STRUCTURE_RESTRICTIONS = new HashMap<>();
 
     public static final HashMap<String, RestrictionTypeLoader> RESTRICTION_TYPES = new HashMap<>();

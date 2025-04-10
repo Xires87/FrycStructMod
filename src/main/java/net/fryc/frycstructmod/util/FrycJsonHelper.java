@@ -2,10 +2,7 @@ package net.fryc.frycstructmod.util;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
@@ -20,6 +17,12 @@ import net.minecraft.util.JsonHelper;
 import oshi.util.tuples.Pair;
 
 public class FrycJsonHelper {
+
+    public static void loadStructureRestriction(Identifier fileId, String jsonString){
+        JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+        String restrictionType = JsonHelper.getString(jsonObject, "type", "default");
+        RestrictionRegistries.RESTRICTION_TYPES.get(restrictionType).loadFromJson(jsonObject, fileId);
+    }
 
     public static ImmutableSet<Block> getExcludedBlocks(JsonArray jsonArray, Identifier fileId){
         ImmutableSet.Builder<Block> builder = ImmutableSet.builder();
