@@ -15,6 +15,9 @@
 		"explosion/ExplosionBehaviorMixin",
 		"explosion/EntityExplosionBehaviorMixin"
 	],
+	"client": [
+		"client/ClientPlayerEntityMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	}

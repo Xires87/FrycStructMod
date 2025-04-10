@@ -9,9 +9,11 @@ import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestrictio
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
+import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -30,6 +32,24 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class ServerRestrictionsHelper {
+
+    public static void setAffectedByStructureServerAndClient(PlayerEntity player, String affected, StructureRestrictionInstance instance) {
+        ((CanBeAffectedByStructure) player).setAffectedByStructure(affected);
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeString(affected);
+        if(instance != null){
+            buf.writeInt(instance.getCurrentSharedPower());
+            for(AbstractStructureRestriction res : instance.getCurrentSeperatePowers().keySet()){
+                buf.writeString(res.getRestrictionType());
+                buf.writeInt(instance.getCurrentSeperatePowers().get(res));
+            }
+        }
+        ServerPlayNetworking.send(((ServerPlayerEntity) player), ModPackets.AFFECT_BY_STRUCTURE, buf);
+    }
+
+    public static Optional<StructureRestrictionInstance> getStructureRestrictionInstance(StructureStart start){
+        return Optional.ofNullable(((HasRestrictions)(Object) start).getStructureRestrictionInstance());
+    }
 
     public static void spawnSoulParticlesServerSided(ServerWorld world, BlockPos pos){
         PacketByteBuf buf = PacketByteBufs.create();

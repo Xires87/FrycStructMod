@@ -1,16 +1,12 @@
 package net.fryc.frycstructmod.mixin.entity;
 
 import com.mojang.authlib.GameProfile;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fryc.frycstructmod.FrycStructMod;
-import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -59,7 +55,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                                 Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
                                 if(id != null){
                                     this.currentStructure = start;
-                                    this.setAffectedByStructureServerAndClient(id.toString());
+                                    ServerRestrictionsHelper.setAffectedByStructureServerAndClient(this, id.toString(), startWithRestrictions.getStructureRestrictionInstance());
                                     this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
 
                                     // checks for persistent entities on enter in case they somehow died (without player's help)
@@ -88,15 +84,8 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
             this.getWorld().getChunk(this.currentStructure.getPos().x, this.currentStructure.getPos().z).setNeedsSaving(true);
             this.sendMessage(Text.of("Wychodze"));
             this.currentStructure = null;
-            this.setAffectedByStructureServerAndClient("");
+            ServerRestrictionsHelper.setAffectedByStructureServerAndClient(this, "", null);
         }
-    }
-
-    public void setAffectedByStructureServerAndClient(String affected) {
-        this.setAffectedByStructure(affected);
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeString(affected);
-        ServerPlayNetworking.send(((ServerPlayerEntity) (Object) this), ModPackets.AFFECT_BY_STRUCTURE, buf);
     }
 
     public @Nullable StructureStart getStructureStart(){

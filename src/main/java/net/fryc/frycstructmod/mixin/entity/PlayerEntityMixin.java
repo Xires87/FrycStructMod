@@ -3,8 +3,12 @@ package net.fryc.frycstructmod.mixin.entity;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
+import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
+import net.fryc.frycstructmod.util.interfaces.client.HoldsStructureRestrictionInstance;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -29,11 +33,22 @@ abstract class PlayerEntityMixin extends LivingEntity {
     @ModifyReturnValue(method = "getBlockBreakingSpeed(Lnet/minecraft/block/BlockState;)F", at = @At("RETURN"))
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
-        // TODO musze na serwerze sprawdzic czy dezaktywowane i networkingiem wyslac info
-        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("default", this);
-        return optional.map(abstractStructureRestriction -> ((DefaultStructureRestriction) abstractStructureRestriction).modifyBlockBreakingSpeedWhenNeeded(
-                original, block, ((PlayerEntity) (Object) this)
-        )).orElse(original);
+        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("default", this);// TODO mozliwe ze bede musial jakos synchronizowac zarejestrowane restrykcje (chyba ze sie same synchronizuja bo nwm)
+        if(optional.isPresent()){
+            Optional<StructureRestrictionInstance> optional2 = this.getWorld().isClient() ?
+                    Optional.ofNullable(((HoldsStructureRestrictionInstance) this).getStructureRestrictionInstance()) :
+                    ServerRestrictionsHelper.getStructureRestrictionInstance(((HoldsStructureStart) this).getStructureStart());
+
+            if(optional2.isPresent()){
+                if(!optional2.get().isRestrictionDisabled(optional.get())){
+                    return ((DefaultStructureRestriction) optional.get()).modifyBlockBreakingSpeedWhenNeeded(
+                            original, block, ((PlayerEntity) (Object) this)
+                    );
+                }
+            }
+        }
+
+        return original;
     }
 
     @Inject(method = "onKilledOther(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/LivingEntity;)Z", at = @At("HEAD"))
