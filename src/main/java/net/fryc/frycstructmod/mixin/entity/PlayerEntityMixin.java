@@ -35,16 +35,11 @@ abstract class PlayerEntityMixin extends LivingEntity {
         // executed on both client and server
         Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("default", this);// TODO mozliwe ze bede musial jakos synchronizowac zarejestrowane restrykcje (chyba ze sie same synchronizuja bo nwm)
         if(optional.isPresent()){
-            Optional<StructureRestrictionInstance> optional2 = this.getWorld().isClient() ?
-                    Optional.ofNullable(((HoldsStructureRestrictionInstance) this).getStructureRestrictionInstance()) :
-                    ServerRestrictionsHelper.getStructureRestrictionInstance(((HoldsStructureStart) this).getStructureStart());
-
-            if(optional2.isPresent()){
-                if(!optional2.get().isRestrictionDisabled(optional.get())){
-                    return ((DefaultStructureRestriction) optional.get()).modifyBlockBreakingSpeedWhenNeeded(
-                            original, block, ((PlayerEntity) (Object) this)
-                    );
-                }
+            PlayerEntity dys = ((PlayerEntity) (Object) this);
+            if(RestrictionsHelper.shouldPlayerBeAffectedByRestriction(optional.get(), dys)){
+                return ((DefaultStructureRestriction) optional.get()).modifyBlockBreakingSpeedWhenNeeded(
+                        original, block, dys
+                );
             }
         }
 

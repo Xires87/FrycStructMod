@@ -8,7 +8,7 @@ import net.fryc.frycstructmod.util.RestrictionsHelper;
 import java.util.*;
 
 public class StructureRestrictionInstance {
-// TODO zrobic zeby sourcey byly shared albo separate i jesli shared to trzeba okreslic czy nalezy dodawac te wartosci czy jak
+// TODO jesli shared to trzeba okreslic czy nalezy dodawac te wartosci czy jak
     private final Set<AbstractStructureRestriction> structureRestrictions;
     private int currentSharedPower;
     private final String structureId;
@@ -20,7 +20,7 @@ public class StructureRestrictionInstance {
     public StructureRestrictionInstance(Collection<AbstractStructureRestriction> structureRestrictions){
         this(convertCollectionToSet(structureRestrictions));
     }
-// TODO albo dzialaja wszystkie restrykcje, albo zadna (maja dzialac te ktore maja wystarczajaco powera)
+
     public StructureRestrictionInstance(Set<AbstractStructureRestriction> structureRestrictions){
         if(structureRestrictions.isEmpty()){
             throw new IllegalArgumentException("Cannot create StructureRestrictionInstance with empty collection!");

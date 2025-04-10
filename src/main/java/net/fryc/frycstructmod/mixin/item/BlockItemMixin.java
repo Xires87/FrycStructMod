@@ -40,17 +40,18 @@ abstract class BlockItemMixin {
     @Inject(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;", at = @At("HEAD"), cancellable = true)
     private void disallowPlacingWhenAffectedByStructure(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> ret) {
         //executed on both client and server
-        // TODO musze na serwerze sprawdzic czy dezaktywowane i networkingiem wyslac info
         PlayerEntity player = context.getPlayer();
         if(player != null){
             Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("default", player);
             if(optional.isPresent()){
-                ItemPlacementContext itemPlacementContext = this.getPlacementContext(context);
-                if(itemPlacementContext != null){
-                    BlockState blockState = this.getPlacementState(itemPlacementContext);
-                    if(blockState != null){
-                        if(!((DefaultStructureRestriction) optional.get()).canBePlaced(blockState, itemPlacementContext)){
-                            ret.setReturnValue(ActionResult.FAIL);
+                if(RestrictionsHelper.shouldPlayerBeAffectedByRestriction(optional.get(), player)){
+                    ItemPlacementContext itemPlacementContext = this.getPlacementContext(context);
+                    if(itemPlacementContext != null){
+                        BlockState blockState = this.getPlacementState(itemPlacementContext);
+                        if(blockState != null){
+                            if(!((DefaultStructureRestriction) optional.get()).canBePlaced(blockState, itemPlacementContext)){
+                                ret.setReturnValue(ActionResult.FAIL);
+                            }
                         }
                     }
                 }
