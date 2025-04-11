@@ -1,7 +1,10 @@
 package net.fryc.frycstructmod.mixin.entity;
 
+import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
@@ -13,6 +16,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
@@ -63,18 +67,25 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
 
     @Inject(method = "canHaveStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;)Z", at = @At("HEAD"), cancellable = true)
     private void makeEntitiesImmune(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> ret) {
+        // TODO zrobic ukrywanie efektow i persistent effecty
+        //this method is also executed on client, so client returns wrong values (nothing bad happened, at least not yet. but it would be better to have it fixed somehow)
         if(!this.getWorld().isClient()){
-            ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
-                Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByType(
-                        "status_effect", this.getWorld().getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure)
-                );
-                // TODO to zawsze bedzie dzialalo bo zle jest zrobiona odpornosc na restrykcje ( i nie sprawdzam tu instancji tylko czy jestem w wiosce)
-                optional.ifPresent(restriction -> {
-                    if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
-                        if(effectRestriction.shouldMakeEntityImmune(this, effect.getEffectType())){
-                            ret.setReturnValue(false);// TODO podmienic to na shadowowanie efektow
+            LivingEntity dys = ((LivingEntity) (Object) this);
+            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", dys);
+            optional.ifPresent(restriction -> {
+                ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) dys.getWorld()), dys.getBlockPos(), structure -> {
+                    Optional<StructureRestrictionInstance> opt = ServerRestrictionsHelper.getStructureRestrictionInstance(
+                            ((ServerWorld) dys.getWorld()).getStructureAccessor().getStructureAt(dys.getBlockPos(), structure)
+                    );
+                    opt.ifPresent(instance -> {
+                        if(!instance.isRestrictionDisabled(restriction)){
+                            if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
+                                if(effectRestriction.shouldIgnoreStatusEffect(this, effect.getEffectType())){
+                                    ret.setReturnValue(false);
+                                }
+                            }
                         }
-                    }
+                    });
                 });
             });
         }

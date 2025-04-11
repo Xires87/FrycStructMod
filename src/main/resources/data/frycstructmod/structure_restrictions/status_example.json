@@ -10,7 +10,8 @@
   "allowed_effects": {
     "allowed": true,
     "except": [
-      "minecraft:regeneration"
+      "minecraft:regeneration",
+      "minecraft:instant_damage"
     ]
   },
   "persistent_effects": [

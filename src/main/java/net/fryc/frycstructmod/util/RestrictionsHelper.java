@@ -59,4 +59,5 @@ public class RestrictionsHelper {
 
         return optional2.filter(restrictionInstance -> !restrictionInstance.isRestrictionDisabled(restriction)).isPresent();
     }
+
 }

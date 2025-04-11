@@ -33,7 +33,11 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
     }
 // TODO zarejestrowac to i wstawic odpalanie w odpowiednim miejscu
 
-    public boolean shouldMakeEntityImmune(Entity entity, StatusEffect effect){
+    public boolean shouldIgnoreStatusEffect(Entity entity, StatusEffect effect){
+        return this.shouldHideStatusEffect(entity, effect) && effect.isInstant();
+    }
+
+    public boolean shouldHideStatusEffect(Entity entity, StatusEffect effect){
         return this.shouldAffectEntity(entity) && !this.shouldAllowEffect(effect);
     }
 
