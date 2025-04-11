@@ -6,6 +6,7 @@ import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -14,6 +15,7 @@ import net.minecraft.structure.StructureStart;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,10 +52,10 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
 
                     // second check, because createStructureRestrictionInstance([...]); can disable restrictions
                     if(startWithRestrictions.hasActiveRestrictions()){
-                        if(start != this.currentStructure) {
-                            if(!ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(start, startWithRestrictions.getStructureRestrictionInstance())){
-                                Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
-                                if(id != null){
+                        Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
+                        if(id != null){
+                            if(start != this.currentStructure) {
+                                if(!ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(start, startWithRestrictions.getStructureRestrictionInstance())){
                                     this.currentStructure = start;
                                     ServerRestrictionsHelper.setAffectedByStructureServerAndClient(this, id.toString(), startWithRestrictions.getStructureRestrictionInstance());
                                     this.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
@@ -61,10 +63,17 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                                     // checks for persistent entities on enter in case they somehow died (without player's help)
                                     ServerRestrictionsHelper.checkForPersistentEntitiesFromSource(startWithRestrictions.getStructureRestrictionInstance(), world, start);
                                 }
-                                else {
-                                    FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
-                                }
                             }
+
+                            world.getOtherEntities(this, Box.from(start.getBoundingBox()), entity -> {
+                                return entity instanceof LivingEntity living && living.isAlive() &&
+                                        !living.isPlayer() && !((CanBeAffectedByStructure)living).isAffectedByStructure();
+                            }).forEach(entity -> {
+                                ((CanBeAffectedByStructure) entity).setAffectedByStructure(id.toString());
+                            });
+                        }
+                        else {
+                            FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
                         }
                     }
                 }

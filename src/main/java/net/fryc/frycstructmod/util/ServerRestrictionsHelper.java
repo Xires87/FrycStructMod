@@ -20,6 +20,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructureStart;
+import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
@@ -59,12 +60,6 @@ public class ServerRestrictionsHelper {
         }
     }
 
-    public static boolean findPersistentMobInStructure(World world, StructureStart structureStart, EntityType<?> type, boolean shouldForcePersistent) {
-        return !world.getEntitiesByType(type, Box.from(structureStart.getBoundingBox()), entity -> {
-            return entity.isAlive() && (!shouldForcePersistent || (entity instanceof MobEntity mob && (mob.isPersistent() || mob.cannotDespawn())));
-        }).isEmpty();
-    }
-
     public static void checkForPersistentEntitiesFromSource(StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
         if(restrictionInstance != null){
             for(AbstractStructureRestriction restriction : restrictionInstance.getStructureRestrictions()){
@@ -75,7 +70,7 @@ public class ServerRestrictionsHelper {
                 for(SourceEntry<?> entry : list){
                     Optional<EntityType<?>> type = EntityType.get(((PersistentMobSourceEntry) entry).getSourceId().toString());
                     if(type.isPresent()){
-                        if(ServerRestrictionsHelper.findPersistentMobInStructure(world, start, type.get(), ((PersistentMobSourceEntry) entry).shouldForcePersistent())){
+                        if(RestrictionsHelper.findPersistentMob(world, start.getBoundingBox(), type.get(), ((PersistentMobSourceEntry) entry).shouldForcePersistent())){
                             shouldDisable = false;
                             break;
                         }

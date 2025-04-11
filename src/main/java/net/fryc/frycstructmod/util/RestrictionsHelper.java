@@ -9,9 +9,14 @@ import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.fryc.frycstructmod.util.interfaces.client.HoldsStructureRestrictionInstance;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockBox;
+import net.minecraft.util.math.Box;
+import net.minecraft.world.World;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,6 +63,12 @@ public class RestrictionsHelper {
                 ServerRestrictionsHelper.getStructureRestrictionInstance(((HoldsStructureStart) player).getStructureStart());
 
         return optional2.filter(restrictionInstance -> !restrictionInstance.isRestrictionDisabled(restriction)).isPresent();
+    }
+
+    public static boolean findPersistentMob(World world, BlockBox box, EntityType<?> type, boolean shouldForcePersistent) {
+        return !world.getEntitiesByType(type, Box.from(box), entity -> {
+            return entity.isAlive() && (!shouldForcePersistent || (entity instanceof MobEntity mob && (mob.isPersistent() || mob.cannotDespawn())));
+        }).isEmpty();
     }
 
 }

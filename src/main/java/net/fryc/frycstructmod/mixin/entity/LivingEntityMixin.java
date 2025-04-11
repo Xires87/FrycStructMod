@@ -1,8 +1,6 @@
 package net.fryc.frycstructmod.mixin.entity;
 
-import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
@@ -14,25 +12,33 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Mixin(LivingEntity.class)
 abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffectedByStructure {
 
     private String affectedByStructure = "";
+
+    private final HashMap<StatusEffect, StatusEffectInstance> inactiveStatusEffects = new HashMap<>();
+
+    @Shadow
+    private @Final Map<StatusEffect, StatusEffectInstance> activeStatusEffects;
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -63,11 +69,10 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
             }
         }
     }
-// TODO zamiast dawac odpornosc na efekty, to shadowowac je (beda na szaro, ich czas nie bedzie mijal i nie beda dzialaly dopoki nie wyjdzie sie ze struktury)
 
     @Inject(method = "canHaveStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;)Z", at = @At("HEAD"), cancellable = true)
     private void makeEntitiesImmune(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> ret) {
-        // TODO zrobic ukrywanie efektow i persistent effecty
+        // TODO zrobic persistent effecty
         //this method is also executed on client, so client returns wrong values (nothing bad happened, at least not yet. but it would be better to have it fixed somehow)
         if(!this.getWorld().isClient()){
             LivingEntity dys = ((LivingEntity) (Object) this);
@@ -86,6 +91,36 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
                             }
                         }
                     });
+                });
+            });
+        }
+    }
+
+    @Inject(method = "tickStatusEffects()V", at = @At("TAIL"))
+    private void hideStatusEffects(CallbackInfo info){
+        LivingEntity dys = ((LivingEntity) (Object)this);
+        if(!this.getWorld().isClient()){
+            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", dys);
+            optional.ifPresentOrElse(restriction -> {
+                ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
+                    ServerRestrictionsHelper.getStructureRestrictionInstance(
+                            ((ServerWorld) this.getWorld()).getStructureAccessor().getStructureAt(this.getBlockPos(), structure)
+                    ).ifPresent(instance -> {
+                        if(!instance.isRestrictionDisabled(restriction)){
+                            if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
+                                for(Map.Entry<StatusEffect, StatusEffectInstance> entry : this.activeStatusEffects.entrySet()) {
+                                    if(effectRestriction.shouldHideStatusEffect(this, entry.getKey())) {
+                                        this.inactiveStatusEffects.put(entry.getKey(), entry.getValue());
+                                        dys.removeStatusEffect(entry.getKey());// TODO networkingiem wysylac info o efektach i wyswietlac nieaktywne efekty (takie przezroczyste bym dal i moze X na ich ikonkach)
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+            }, () -> {
+                this.inactiveStatusEffects.entrySet().removeIf(statusEffectStatusEffectInstanceEntry -> {
+                    return dys.addStatusEffect(statusEffectStatusEffectInstanceEntry.getValue());
                 });
             });
         }
