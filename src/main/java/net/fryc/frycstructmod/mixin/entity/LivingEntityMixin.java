@@ -80,7 +80,10 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
                 ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
                     restriction.executeWhenEnabled(((ServerWorld) this.getWorld()), this.getBlockPos(), structure, (start, restrictionInstance) -> {
                         if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
-                            if(effectRestriction.shouldIgnoreStatusEffect(this, effect.getEffectType())){
+                            if(effectRestriction.shouldHideStatusEffect(this, effect.getEffectType())){
+                                if(!effect.getEffectType().isInstant()){
+                                    this.addStatusEffectToInactiveEffects(effect);// TODO zapisywanie inactive efektow do nbt
+                                }
                                 ret.setReturnValue(false);
                             }
                         }
@@ -90,7 +93,7 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
         }
     }
 
-    @Inject(method = "tickStatusEffects()V", at = @At("TAIL"))
+    @Inject(method = "tickStatusEffects()V", at = @At("HEAD"))
     private void hideStatusEffects(CallbackInfo info){
         LivingEntity dys = ((LivingEntity) (Object)this);
         if(!this.getWorld().isClient()){
@@ -101,7 +104,7 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
                         if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
                             for(Map.Entry<StatusEffect, StatusEffectInstance> entry : this.activeStatusEffects.entrySet()) {
                                 if(effectRestriction.shouldHideStatusEffect(this, entry.getKey())) {
-                                    this.inactiveStatusEffects.put(entry.getKey(), entry.getValue());
+                                    this.addStatusEffectToInactiveEffects(entry.getValue());
                                     dys.removeStatusEffect(entry.getKey());// TODO networkingiem wysylac info o efektach i wyswietlac nieaktywne efekty (takie przezroczyste bym dal i moze X na ich ikonkach)
                                 }
                             }
@@ -126,6 +129,15 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
 
     public String getStructureId(){
         return this.affectedByStructure;
+    }
+
+    private void addStatusEffectToInactiveEffects(StatusEffectInstance effect){
+        if(!this.inactiveStatusEffects.containsKey(effect.getEffectType())){
+            this.inactiveStatusEffects.put(effect.getEffectType(), effect);
+        }
+        else {
+            this.inactiveStatusEffects.get(effect.getEffectType()).upgrade(effect);
+        }
     }
 
 }
