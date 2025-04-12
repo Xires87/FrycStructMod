@@ -17,9 +17,12 @@
   "persistent_effects": [
     {
       "id": "minecraft:slowness",
-      "forPlayer": true,
       "amplifier": 1,
-      "duration": 0
+      "duration": -1,
+      "forPlayer": true,
+      "ambient": false,
+      "showParticles": true,
+      "showIcon": true
     }
   ],
   "source": {

@@ -14,6 +14,7 @@ import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import oshi.util.tuples.Quartet;
 import oshi.util.tuples.Triplet;
 
 public class FrycJsonHelper {
@@ -70,16 +71,19 @@ public class FrycJsonHelper {
         return builder.build();
     }
 
-    public static ImmutableMap<StatusEffect, Triplet<Boolean, Integer, Integer>> getPersistentEffectsMap(JsonArray jsonArray, Identifier fileId){
-        ImmutableMap.Builder<StatusEffect, Triplet<Boolean, Integer, Integer>> builder = ImmutableMap.builder();
+    public static ImmutableMap<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> getPersistentEffectsMap(JsonArray jsonArray, Identifier fileId){
+        ImmutableMap.Builder<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> builder = ImmutableMap.builder();
         for(JsonElement element : jsonArray){
             try{
                 JsonObject statusEffectObject = JsonHelper.asObject(element, "StatusEffectObject");
                 JsonElement effectElement = JsonHelper.getElement(statusEffectObject, "id");
-                boolean forPlayer = JsonHelper.getBoolean(statusEffectObject, "forPlayer", true);
                 int amplifier = JsonHelper.getInt(statusEffectObject, "amplifier");
                 int duration = JsonHelper.getInt(statusEffectObject, "duration");
-                builder.put(asStatusEffect(effectElement, "statusEffectFromJsonObject"), new Triplet<>(forPlayer, amplifier, duration));
+                boolean forPlayer = JsonHelper.getBoolean(statusEffectObject, "forPlayer", true);
+                boolean ambient = JsonHelper.getBoolean(statusEffectObject, "ambient", false);
+                boolean showParticles = JsonHelper.getBoolean(statusEffectObject, "showParticles", true);
+                boolean showIcon = JsonHelper.getBoolean(statusEffectObject, "showIcon", true);
+                builder.put(asStatusEffect(effectElement, "statusEffectFromJsonObject"), new Triplet<>(new Quartet<>(forPlayer, ambient, showParticles, showIcon), amplifier, duration));
 
             } catch (Exception e) {
                 FrycStructMod.LOGGER.error("Error occurred while loading persistent status effects from the following file: " + fileId.toString(), e);

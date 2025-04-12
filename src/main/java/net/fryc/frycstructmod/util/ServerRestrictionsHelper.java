@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
@@ -17,6 +18,7 @@ import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -31,6 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.gen.structure.Structure;
+import oshi.util.tuples.Quartet;
 
 import java.util.List;
 import java.util.Map;
@@ -157,21 +160,20 @@ public class ServerRestrictionsHelper {
     }
 
     public static void onStructureTick(ServerPlayerEntity player, StructureStart start, StructureRestrictionInstance restrictionInstance, Identifier structureId){
-        if(start != ((HoldsStructureStart)player).getStructureStart()) {
-            ServerRestrictionsHelper.onStructureEnter(player, start, restrictionInstance, structureId);
-        }
-
         List<Entity> entities = player.getWorld().getOtherEntities(player, Box.from(start.getBoundingBox()), entity -> {
-            return entity instanceof LivingEntity living && living.isAlive() &&
-                    !living.isPlayer() && !((CanBeAffectedByStructure)living).isAffectedByStructure();
+            return entity instanceof LivingEntity living && living.isAlive() && !living.isPlayer();
         });
+
+        if(start != ((HoldsStructureStart)player).getStructureStart()) {
+            ServerRestrictionsHelper.onStructureEnter(player, start, restrictionInstance, structureId, entities);
+        }
 
         entities.forEach(entity -> {
             ((CanBeAffectedByStructure) entity).setAffectedByStructure(structureId.toString());
         });
     }
 
-    public static void onStructureEnter(ServerPlayerEntity player, StructureStart start, StructureRestrictionInstance restrictionInstance, Identifier structureId){
+    public static void onStructureEnter(ServerPlayerEntity player, StructureStart start, StructureRestrictionInstance restrictionInstance, Identifier structureId, List<Entity> nonPlayerLivingEntities){
         if(!ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(start, restrictionInstance)){
             ((HoldsStructureStart) player).setStructureStart(start);
             ServerRestrictionsHelper.setAffectedByStructureServerAndClient(player, structureId.toString(), restrictionInstance);
@@ -180,8 +182,26 @@ public class ServerRestrictionsHelper {
             // checks for persistent entities on enter in case they somehow died (without player's help)
             ServerRestrictionsHelper.checkForPersistentEntitiesFromSource(restrictionInstance, player.getServerWorld(), start);
 
-            // TODO odpalic eventy
-
+            // TODO odpalic eventy zamiast tego
+            RestrictionsHelper.getRestrictionByType("status_effect", structureId).ifPresent(restriction -> {
+                if(!((HasRestrictions)(Object) start).getStructureRestrictionInstance().isRestrictionDisabled(restriction)){
+                    if(restriction instanceof StatusEffectStructureRestriction statusRes){
+                        statusRes.getPersistentEffects().forEach((effect, triplet) -> {
+                            int amp = triplet.getB() - 1 > -1 ? triplet.getB() - 1 : 0;
+                            int dur = triplet.getC() > 0 ? triplet.getC() : -1;
+                            Quartet<Boolean, Boolean, Boolean, Boolean> quartet = triplet.getA();
+                            if(quartet.getA()){
+                                player.addStatusEffect(new StatusEffectInstance(effect, dur, amp, quartet.getB(), quartet.getC(), quartet.getD()));
+                            }
+                            else {
+                                nonPlayerLivingEntities.forEach(entity -> {
+                                    ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(effect, dur, amp, quartet.getB(), quartet.getC(), quartet.getD()));
+                                });
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
 
@@ -203,7 +223,7 @@ public class ServerRestrictionsHelper {
             restriction.executeWhenEnabled(player.getServerWorld(), player.getBlockPos(), structure, (structureStart, instance) -> {
                 if(restriction instanceof StatusEffectStructureRestriction statusRes){
                     statusRes.getPersistentEffects().forEach((effect, triplet) -> {
-                        // TODO dac tu te persistent effecty ale najpierw posprzatac bo taki balagan jest w kodzie ze sie gubie
+                        // TODO dac tu te persistent effecty
                     });
                 }
             });

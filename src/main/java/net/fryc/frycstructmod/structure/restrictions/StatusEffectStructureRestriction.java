@@ -5,6 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
+import oshi.util.tuples.Quartet;
 import oshi.util.tuples.Triplet;
 
 import java.util.Map;
@@ -17,12 +18,12 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
 
     private final Set<StatusEffect> excludedEffects;
     private final Set<EntityType<?>> excludedEntities;
-    private final Map<StatusEffect, Triplet<Boolean, Integer, Integer>> persistentEffects;
+    private final Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> persistentEffects;
 
 
     public StatusEffectStructureRestriction(String structureId, boolean affectAllEntities, Set<EntityType<?>> excludedEntities,
                                             boolean allowAllEffects, Set<StatusEffect> excludedEffects,
-                                            Map<StatusEffect, Triplet<Boolean, Integer, Integer>> persistentEffects, RestrictionSource restrictionSource) {
+                                            Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> persistentEffects, RestrictionSource restrictionSource) {
 
         super(structureId, "status_effect", restrictionSource);
         this.affectAllEntities = affectAllEntities;
@@ -60,7 +61,7 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
         return excludedEntities;
     }
 
-    public Map<StatusEffect, Triplet<Boolean, Integer, Integer>> getPersistentEffects() {
+    public Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> getPersistentEffects() {
         return persistentEffects;
     }
 

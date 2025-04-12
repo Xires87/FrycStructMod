@@ -28,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,6 +45,9 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
+
+    @Shadow
+    protected abstract void onStatusEffectRemoved(StatusEffectInstance effect);
 
     // checks for persistent mobs when persistent mob dies without player's help
     @Inject(method = "onDeath(Lnet/minecraft/entity/damage/DamageSource;)V", at = @At("HEAD"))
@@ -103,10 +107,14 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
                 ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
                     restriction.executeWhenEnabled(((ServerWorld) this.getWorld()), this.getBlockPos(), structure, (start, restrictionInstance) -> {
                         if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
-                            for(Map.Entry<StatusEffect, StatusEffectInstance> entry : this.activeStatusEffects.entrySet()) {
+                            Iterator<Map.Entry<StatusEffect, StatusEffectInstance>> iterator = this.activeStatusEffects.entrySet().iterator();
+                            while(iterator.hasNext()){
+                                Map.Entry<StatusEffect, StatusEffectInstance> entry = iterator.next();
                                 if(effectRestriction.shouldHideStatusEffect(this, entry.getKey())) {
-                                    this.addStatusEffectToInactiveEffects(entry.getValue());
-                                    dys.removeStatusEffect(entry.getKey());// TODO networkingiem wysylac info o efektach i wyswietlac nieaktywne efekty (takie przezroczyste bym dal i moze X na ich ikonkach)
+                                    StatusEffectInstance removedEffect = entry.getValue();
+                                    this.addStatusEffectToInactiveEffects(removedEffect);
+                                    iterator.remove();// TODO networkingiem wysylac info o efektach i wyswietlac nieaktywne efekty (takie przezroczyste bym dal i moze X na ich ikonkach)
+                                    this.onStatusEffectRemoved(removedEffect);
                                 }
                             }
                         }

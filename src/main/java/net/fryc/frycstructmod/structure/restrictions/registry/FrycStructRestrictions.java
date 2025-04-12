@@ -17,6 +17,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import oshi.util.tuples.Pair;
+import oshi.util.tuples.Quartet;
 import oshi.util.tuples.Triplet;
 
 import java.util.Map;
@@ -60,7 +61,7 @@ public class FrycStructRestrictions {
             ImmutableSet<StatusEffect> allowedEffectExceptions = FrycJsonHelper.getExcludedStatusEffects(allowedStatusExcept, id);
 
             JsonArray persistentEffectsArray = JsonHelper.getArray(jsonObject, "persistent_effects");
-            Map<StatusEffect, Triplet<Boolean, Integer, Integer>> persistentEffectsMap = FrycJsonHelper.getPersistentEffectsMap(persistentEffectsArray, id);
+            Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> persistentEffectsMap = FrycJsonHelper.getPersistentEffectsMap(persistentEffectsArray, id);
 
             RestrictionRegistries.registerStructureRestriction(identifier, "status_effect", new StatusEffectStructureRestriction(
                     identifier, affectAll, entityExceptions, allowEffects, allowedEffectExceptions,
