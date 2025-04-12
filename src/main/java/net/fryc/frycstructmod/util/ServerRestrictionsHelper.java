@@ -127,8 +127,6 @@ public class ServerRestrictionsHelper {
         executeIfHasStructureOrElse(world, pos, action, () -> {});
     }
 
-    // TODO zrobic eventy zeby odpalalo tutaj w opdowiednim miejscu i wtedy by sie ten persistent robil
-    // TODO zrobic zeby to swiat tickowal strukture a nie gracz (bo jak wielu graczy bedzie w strukturze to bedzie wiele razy tickowana, powinno sprawdzac czy powinna sie tickowac i wtedy tickowac)
     public static void tickStructure(PlayerEntity pl, Structure structure){
         ServerPlayerEntity player = ((ServerPlayerEntity) pl);
         ServerWorld world = player.getServerWorld();
@@ -165,6 +163,10 @@ public class ServerRestrictionsHelper {
         });
 
         if(start != ((HoldsStructureStart)player).getStructureStart()) {
+            if(((HoldsStructureStart)player).getStructureStart() != null){
+                // executed when player enters one structure while leaving another
+                ServerRestrictionsHelper.onStructureLeave(player);
+            }
             ServerRestrictionsHelper.onStructureEnter(player, start, restrictionInstance, structureId, entities);
         }
 
@@ -205,6 +207,10 @@ public class ServerRestrictionsHelper {
         }
     }
 
+    public static void onStructureLeave(PlayerEntity player){
+        // TODO zrobic usuwanie persistent effectow
+    }
+
     public static void resetCurrentStructureWhenNeeded(PlayerEntity player){
         HoldsStructureStart structureGetter = ((HoldsStructureStart) player);
         if(structureGetter.getStructureStart() != null){
@@ -212,25 +218,9 @@ public class ServerRestrictionsHelper {
             player.sendMessage(Text.of("Wychodze"));
             structureGetter.setStructureStart(null);
             ServerRestrictionsHelper.setAffectedByStructureServerAndClient(player, "", null);
+            ServerRestrictionsHelper.onStructureLeave(player);
         }
     }
-
-    // TODO
-    /*
-    void doEventa(){
-
-        RestrictionsHelper.getRestrictionByType("status_effect", id).ifPresent(restriction -> {
-            restriction.executeWhenEnabled(player.getServerWorld(), player.getBlockPos(), structure, (structureStart, instance) -> {
-                if(restriction instanceof StatusEffectStructureRestriction statusRes){
-                    statusRes.getPersistentEffects().forEach((effect, triplet) -> {
-                        // TODO dac tu te persistent effecty
-                    });
-                }
-            });
-        });
-    }
-
-     */
 
     public static void onStructureStartLoadFromNbt(StructureStart start, StructureContext context, NbtCompound nbt, long seed){
         if(nbt.contains("structureRestrictionActive")){

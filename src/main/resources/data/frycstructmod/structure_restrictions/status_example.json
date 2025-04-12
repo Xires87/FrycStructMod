@@ -14,7 +14,7 @@
       "minecraft:instant_damage"
     ]
   },
-  "persistent_effects": [
+  "structure_effects": [
     {
       "id": "minecraft:slowness",
       "amplifier": 1,

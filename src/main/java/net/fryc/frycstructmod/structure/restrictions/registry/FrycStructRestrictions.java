@@ -60,7 +60,7 @@ public class FrycStructRestrictions {
             boolean allowEffects = JsonHelper.getBoolean(allowedEffectsObject, "allowed", true);
             ImmutableSet<StatusEffect> allowedEffectExceptions = FrycJsonHelper.getExcludedStatusEffects(allowedStatusExcept, id);
 
-            JsonArray persistentEffectsArray = JsonHelper.getArray(jsonObject, "persistent_effects");
+            JsonArray persistentEffectsArray = JsonHelper.getArray(jsonObject, "structure_effects");
             Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> persistentEffectsMap = FrycJsonHelper.getPersistentEffectsMap(persistentEffectsArray, id);
 
             RestrictionRegistries.registerStructureRestriction(identifier, "status_effect", new StatusEffectStructureRestriction(

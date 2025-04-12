@@ -24,11 +24,18 @@ public abstract class AbstractStructureRestriction {
     }
 
     public void executeWhenEnabled(ServerWorld world, BlockPos pos, Structure structure, BiConsumer<StructureStart, StructureRestrictionInstance> consumer){
+        this.executeWhenEnabledOrElse(world, pos, structure, consumer, (start, restrictionInstance) -> {});
+    }
+
+    public void executeWhenEnabledOrElse(ServerWorld world, BlockPos pos, Structure structure, BiConsumer<StructureStart, StructureRestrictionInstance> consumer, BiConsumer<StructureStart, StructureRestrictionInstance> elseConsumer){
         StructureStart start = world.getStructureAccessor().getStructureAt(pos, structure);
         Optional<StructureRestrictionInstance> opt = ServerRestrictionsHelper.getStructureRestrictionInstance(start);
         opt.ifPresent(restrictionInstance -> {
             if(!restrictionInstance.isRestrictionDisabled(this)){
                 consumer.accept(start, restrictionInstance);
+            }
+            else {
+                elseConsumer.accept(start, restrictionInstance);
             }
         });
     }

@@ -105,7 +105,7 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
             Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", dys);
             optional.ifPresentOrElse(restriction -> {
                 ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
-                    restriction.executeWhenEnabled(((ServerWorld) this.getWorld()), this.getBlockPos(), structure, (start, restrictionInstance) -> {
+                    restriction.executeWhenEnabledOrElse(((ServerWorld) this.getWorld()), this.getBlockPos(), structure, (start, restrictionInstance) -> {
                         if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
                             Iterator<Map.Entry<StatusEffect, StatusEffectInstance>> iterator = this.activeStatusEffects.entrySet().iterator();
                             while(iterator.hasNext()){
@@ -118,6 +118,10 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
                                 }
                             }
                         }
+                    }, (start, restrictionInstance) -> {
+                        this.inactiveStatusEffects.entrySet().removeIf(statusEffectStatusEffectInstanceEntry -> {
+                            return dys.addStatusEffect(statusEffectStatusEffectInstanceEntry.getValue());
+                        });
                     });
                 });
             }, () -> {
