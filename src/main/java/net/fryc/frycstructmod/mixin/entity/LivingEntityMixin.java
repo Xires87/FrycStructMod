@@ -2,7 +2,6 @@ package net.fryc.frycstructmod.mixin.entity;
 
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
-import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
@@ -15,6 +14,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.world.World;
@@ -82,7 +83,7 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
                         if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
                             if(effectRestriction.shouldHideStatusEffect(this, effect.getEffectType())){
                                 if(!effect.getEffectType().isInstant()){
-                                    this.addStatusEffectToInactiveEffects(effect);// TODO zapisywanie inactive efektow do nbt
+                                    this.addStatusEffectToInactiveEffects(effect);
                                 }
                                 ret.setReturnValue(false);
                             }
@@ -116,6 +117,34 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
                     return dys.addStatusEffect(statusEffectStatusEffectInstanceEntry.getValue());
                 });
             });
+        }
+    }
+
+    @Inject(method = "writeCustomDataToNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("TAIL"))
+    private void saveInactiveEffectsToNbt(NbtCompound nbt, CallbackInfo info) {
+        if (!this.inactiveStatusEffects.isEmpty()) {
+            NbtList nbtList = new NbtList();
+
+            for(StatusEffectInstance statusEffectInstance : this.inactiveStatusEffects.values()) {
+                nbtList.add(statusEffectInstance.writeNbt(new NbtCompound()));
+            }
+
+            nbt.put("InactiveEffects", nbtList);
+        }
+    }
+
+    @Inject(method = "readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("TAIL"))
+    private void readInactiveEffectsFromNbt(NbtCompound nbt, CallbackInfo info) {
+        if (nbt.contains("InactiveEffects", 9)) {
+            NbtList nbtList = nbt.getList("InactiveEffects", 10);
+
+            for(int i = 0; i < nbtList.size(); ++i) {
+                NbtCompound nbtCompound = nbtList.getCompound(i);
+                StatusEffectInstance statusEffectInstance = StatusEffectInstance.fromNbt(nbtCompound);
+                if (statusEffectInstance != null) {
+                    this.inactiveStatusEffects.put(statusEffectInstance.getEffectType(), statusEffectInstance);
+                }
+            }
         }
     }
 
