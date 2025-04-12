@@ -5,7 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
-import oshi.util.tuples.Pair;
+import oshi.util.tuples.Triplet;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,12 +17,12 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
 
     private final Set<StatusEffect> excludedEffects;
     private final Set<EntityType<?>> excludedEntities;
-    private final Map<StatusEffect, Pair<Integer, Integer>> persistentEffects;
+    private final Map<StatusEffect, Triplet<Boolean, Integer, Integer>> persistentEffects;
 
 
     public StatusEffectStructureRestriction(String structureId, boolean affectAllEntities, Set<EntityType<?>> excludedEntities,
                                             boolean allowAllEffects, Set<StatusEffect> excludedEffects,
-                                            Map<StatusEffect, Pair<Integer, Integer>> persistentEffects, RestrictionSource restrictionSource) {
+                                            Map<StatusEffect, Triplet<Boolean, Integer, Integer>> persistentEffects, RestrictionSource restrictionSource) {
 
         super(structureId, "status_effect", restrictionSource);
         this.affectAllEntities = affectAllEntities;
@@ -31,7 +31,7 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
         this.excludedEntities = excludedEntities;
         this.persistentEffects = persistentEffects;
     }
-// TODO zarejestrowac to i wstawic odpalanie w odpowiednim miejscu
+
 
     public boolean shouldIgnoreStatusEffect(Entity entity, StatusEffect effect){
         return this.shouldHideStatusEffect(entity, effect) && effect.isInstant();
@@ -65,7 +65,7 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
         return excludedEntities;
     }
 
-    public Map<StatusEffect, Pair<Integer, Integer>> getPersistentEffects() {
+    public Map<StatusEffect, Triplet<Boolean, Integer, Integer>> getPersistentEffects() {
         return persistentEffects;
     }
 

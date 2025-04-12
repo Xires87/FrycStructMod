@@ -12,6 +12,6 @@ public interface HasRestrictions {
 
     @Nullable StructureRestrictionInstance getStructureRestrictionInstance();
 
-    void createStructureRestrictionInstance(DynamicRegistryManager manager);
+    boolean createStructureRestrictionInstance(DynamicRegistryManager manager);
 
 }

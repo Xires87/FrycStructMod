@@ -6,4 +6,6 @@ import org.jetbrains.annotations.Nullable;
 public interface HoldsStructureStart {
 
     @Nullable StructureStart getStructureStart();
+
+    void setStructureStart(@Nullable StructureStart start);
 }

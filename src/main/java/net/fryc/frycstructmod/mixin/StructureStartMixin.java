@@ -6,12 +6,10 @@ import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestrictio
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionRegistries;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
-import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.PlayerLocator;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.DynamicRegistryManager;
@@ -26,12 +24,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
 
 @Mixin(StructureStart.class)
 abstract class StructureStartMixin implements HasRestrictions, PlayerLocator {
@@ -76,18 +74,18 @@ abstract class StructureStartMixin implements HasRestrictions, PlayerLocator {
         return this.structureRestrictionInstance;
     }
 
-    public void createStructureRestrictionInstance(DynamicRegistryManager manager){
+    public boolean createStructureRestrictionInstance(DynamicRegistryManager manager){
         Identifier id = manager.get(RegistryKeys.STRUCTURE).getId(((StructureStart) (Object) this).getStructure());
         if(id != null){
             HashMap<String, AbstractStructureRestriction> restrictions = RestrictionRegistries.STRUCTURE_RESTRICTIONS.get(id.toString());
             if(restrictions != null){
                 this.structureRestrictionInstance = new StructureRestrictionInstance(restrictions.values());
+                return true;
             }
-            else {
-                this.setActiveRestrictions(false);
-            }
-
         }
+
+        this.setActiveRestrictions(false);
+        return false;
     }
 
     public List<PlayerEntity> getPlayersInStructure(World world){

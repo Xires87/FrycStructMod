@@ -17,6 +17,7 @@
   "persistent_effects": [
     {
       "id": "minecraft:slowness",
+      "forPlayer": true,
       "amplifier": 1,
       "duration": 0
     }

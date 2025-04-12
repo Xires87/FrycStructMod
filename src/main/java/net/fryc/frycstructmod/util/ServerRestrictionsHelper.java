@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fryc.frycstructmod.FrycStructMod;
 import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
@@ -11,20 +12,23 @@ import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSource
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
+import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructureStart;
-import net.minecraft.util.math.BlockBox;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
 
 import java.util.List;
@@ -115,6 +119,89 @@ public class ServerRestrictionsHelper {
     public static void executeIfHasStructure(ServerWorld world, BlockPos pos, Consumer<Structure> action){
         executeIfHasStructureOrElse(world, pos, action, () -> {});
     }
+
+    // TODO zrobic eventy zeby odpalalo tutaj w opdowiednim miejscu i wtedy by sie ten persistent robil
+    // TODO zrobic zeby to swiat tickowal strukture a nie gracz (bo jak wielu graczy bedzie w strukturze to bedzie wiele razy tickowana, powinno sprawdzac czy powinna sie tickowac i wtedy tickowac)
+    public static void tickStructure(PlayerEntity pl, Structure structure){
+        ServerPlayerEntity player = ((ServerPlayerEntity) pl);
+        StructureStart start = player.getServerWorld().getStructureAccessor().getStructureAt(player.getBlockPos(), structure);
+        HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
+
+        if(startWithRestrictions.hasActiveRestrictions()){
+            if(startWithRestrictions.getStructureRestrictionInstance() == null){
+                if(!startWithRestrictions.createStructureRestrictionInstance(player.getServerWorld().getRegistryManager())){
+                    return;
+                }
+            }
+
+            Identifier id = player.getServerWorld().getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
+            if(id != null){
+                ServerRestrictionsHelper.onStructureTick(player, start, startWithRestrictions.getStructureRestrictionInstance(), id);
+            }
+            else {
+                FrycStructMod.LOGGER.error("Failed to get identifier of the following structure type: " + structure.getType().getClass().getName());
+            }
+        }
+        else {
+            ServerRestrictionsHelper.resetCurrentStructureWhenNeeded(player);
+        }
+    }
+
+    public static void onStructureTick(ServerPlayerEntity player, StructureStart start, StructureRestrictionInstance restrictionInstance, Identifier structureId){
+        if(start != ((HoldsStructureStart)player).getStructureStart()) {
+            ServerRestrictionsHelper.onStructureEnter(player, start, restrictionInstance, structureId);
+        }
+
+        List<Entity> entities = player.getWorld().getOtherEntities(player, Box.from(start.getBoundingBox()), entity -> {
+            return entity instanceof LivingEntity living && living.isAlive() &&
+                    !living.isPlayer() && !((CanBeAffectedByStructure)living).isAffectedByStructure();
+        });
+
+        entities.forEach(entity -> {
+            ((CanBeAffectedByStructure) entity).setAffectedByStructure(structureId.toString());
+        });
+    }
+
+    public static void onStructureEnter(ServerPlayerEntity player, StructureStart start, StructureRestrictionInstance restrictionInstance, Identifier structureId){
+        if(!ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(start, restrictionInstance)){
+            ((HoldsStructureStart) player).setStructureStart(start);
+            ServerRestrictionsHelper.setAffectedByStructureServerAndClient(player, structureId.toString(), restrictionInstance);
+            player.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
+
+            // checks for persistent entities on enter in case they somehow died (without player's help)
+            ServerRestrictionsHelper.checkForPersistentEntitiesFromSource(restrictionInstance, player.getServerWorld(), start);
+
+            // TODO odpalic eventy
+
+        }
+    }
+
+    public static void resetCurrentStructureWhenNeeded(PlayerEntity player){
+        HoldsStructureStart structureGetter = ((HoldsStructureStart) player);
+        if(structureGetter.getStructureStart() != null){
+            player.getWorld().getChunk(structureGetter.getStructureStart().getPos().x, structureGetter.getStructureStart().getPos().z).setNeedsSaving(true);
+            player.sendMessage(Text.of("Wychodze"));
+            structureGetter.setStructureStart(null);
+            ServerRestrictionsHelper.setAffectedByStructureServerAndClient(player, "", null);
+        }
+    }
+
+    // TODO
+    /*
+    void doEventa(){
+
+        RestrictionsHelper.getRestrictionByType("status_effect", id).ifPresent(restriction -> {
+            restriction.executeWhenEnabled(player.getServerWorld(), player.getBlockPos(), structure, (structureStart, instance) -> {
+                if(restriction instanceof StatusEffectStructureRestriction statusRes){
+                    statusRes.getPersistentEffects().forEach((effect, triplet) -> {
+                        // TODO dac tu te persistent effecty ale najpierw posprzatac bo taki balagan jest w kodzie ze sie gubie
+                    });
+                }
+            });
+        });
+    }
+
+     */
 
     public static void onStructureStartLoadFromNbt(StructureStart start, StructureContext context, NbtCompound nbt, long seed){
         if(nbt.contains("structureRestrictionActive")){

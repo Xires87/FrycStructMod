@@ -46,4 +46,8 @@ abstract class ExplosionMixin implements HoldsStructureStart {
     public @Nullable StructureStart getStructureStart() {
         return this.currentStructure;
     }
+
+    public void setStructureStart(@Nullable StructureStart start) {
+        this.currentStructure = start;
+    }
 }

@@ -75,19 +75,13 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
         // TODO zrobic persistent effecty
         //this method is also executed on client, so client returns wrong values (nothing bad happened, at least not yet. but it would be better to have it fixed somehow)
         if(!this.getWorld().isClient()){
-            LivingEntity dys = ((LivingEntity) (Object) this);
-            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", dys);
+            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", ((LivingEntity) (Object) this));
             optional.ifPresent(restriction -> {
-                ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) dys.getWorld()), dys.getBlockPos(), structure -> {
-                    Optional<StructureRestrictionInstance> opt = ServerRestrictionsHelper.getStructureRestrictionInstance(
-                            ((ServerWorld) dys.getWorld()).getStructureAccessor().getStructureAt(dys.getBlockPos(), structure)
-                    );
-                    opt.ifPresent(instance -> {
-                        if(!instance.isRestrictionDisabled(restriction)){
-                            if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
-                                if(effectRestriction.shouldIgnoreStatusEffect(this, effect.getEffectType())){
-                                    ret.setReturnValue(false);
-                                }
+                ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
+                    restriction.executeWhenEnabled(((ServerWorld) this.getWorld()), this.getBlockPos(), structure, (start, restrictionInstance) -> {
+                        if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
+                            if(effectRestriction.shouldIgnoreStatusEffect(this, effect.getEffectType())){
+                                ret.setReturnValue(false);
                             }
                         }
                     });
@@ -103,16 +97,12 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
             Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", dys);
             optional.ifPresentOrElse(restriction -> {
                 ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
-                    ServerRestrictionsHelper.getStructureRestrictionInstance(
-                            ((ServerWorld) this.getWorld()).getStructureAccessor().getStructureAt(this.getBlockPos(), structure)
-                    ).ifPresent(instance -> {
-                        if(!instance.isRestrictionDisabled(restriction)){
-                            if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
-                                for(Map.Entry<StatusEffect, StatusEffectInstance> entry : this.activeStatusEffects.entrySet()) {
-                                    if(effectRestriction.shouldHideStatusEffect(this, entry.getKey())) {
-                                        this.inactiveStatusEffects.put(entry.getKey(), entry.getValue());
-                                        dys.removeStatusEffect(entry.getKey());// TODO networkingiem wysylac info o efektach i wyswietlac nieaktywne efekty (takie przezroczyste bym dal i moze X na ich ikonkach)
-                                    }
+                    restriction.executeWhenEnabled(((ServerWorld) this.getWorld()), this.getBlockPos(), structure, (start, restrictionInstance) -> {
+                        if(restriction instanceof StatusEffectStructureRestriction effectRestriction){
+                            for(Map.Entry<StatusEffect, StatusEffectInstance> entry : this.activeStatusEffects.entrySet()) {
+                                if(effectRestriction.shouldHideStatusEffect(this, entry.getKey())) {
+                                    this.inactiveStatusEffects.put(entry.getKey(), entry.getValue());
+                                    dys.removeStatusEffect(entry.getKey());// TODO networkingiem wysylac info o efektach i wyswietlac nieaktywne efekty (takie przezroczyste bym dal i moze X na ich ikonkach)
                                 }
                             }
                         }

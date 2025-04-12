@@ -17,6 +17,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public class RestrictionsHelper {
         }).findFirst();
     }
 
-    public static Optional<AbstractStructureRestriction> getRestrictionByType(String type, Identifier structureId){
+    public static Optional<AbstractStructureRestriction> getRestrictionByType(String type, @Nullable Identifier structureId){
         return structureId != null ? getRestrictionByType(type, structureId.toString()) : Optional.empty();
     }
 
