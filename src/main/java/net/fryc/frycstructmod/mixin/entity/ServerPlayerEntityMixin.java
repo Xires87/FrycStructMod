@@ -22,7 +22,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
     @Nullable
     private StructureStart currentStructure = null;
 
-    private int delay = 120;
+    private int delay = ServerRestrictionsHelper.PLAYER_JOIN_STRUCTURE_TICK_DELAY;
 
     public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
         super(world, pos, yaw, gameProfile);
@@ -36,7 +36,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
                 ServerRestrictionsHelper.tickStructure(this, structure);
             }, () -> ServerRestrictionsHelper.resetCurrentStructureWhenNeeded(this));
 
-            this.delay = 30;
+            this.delay = ServerRestrictionsHelper.STRUCTURE_TICK_DELAY;
         }
     }
 

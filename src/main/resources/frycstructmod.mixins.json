@@ -6,6 +6,7 @@
 		"StructureStartMixin",
 		"PlayerManagerMixin",
 		"StatusEffectMixin",
+		"ServerWorldMixin",
 		"block/BlockMixin",
 		"block/FireBlockMixin",
 		"item/BlockItemMixin",

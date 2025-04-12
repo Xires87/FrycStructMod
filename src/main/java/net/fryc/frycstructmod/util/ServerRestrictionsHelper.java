@@ -11,6 +11,7 @@ import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstanc
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
+import net.fryc.frycstructmod.util.interfaces.ControlsStructureTick;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
 import net.minecraft.entity.Entity;
@@ -37,6 +38,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class ServerRestrictionsHelper {
+
+    public static final int STRUCTURE_TICK_DELAY = 30;
+    public static final int PLAYER_JOIN_STRUCTURE_TICK_DELAY = 120;
 
     public static void setAffectedByStructureServerAndClient(PlayerEntity player, String affected, StructureRestrictionInstance instance) {
         ((CanBeAffectedByStructure) player).setAffectedByStructure(affected);
@@ -124,17 +128,22 @@ public class ServerRestrictionsHelper {
     // TODO zrobic zeby to swiat tickowal strukture a nie gracz (bo jak wielu graczy bedzie w strukturze to bedzie wiele razy tickowana, powinno sprawdzac czy powinna sie tickowac i wtedy tickowac)
     public static void tickStructure(PlayerEntity pl, Structure structure){
         ServerPlayerEntity player = ((ServerPlayerEntity) pl);
-        StructureStart start = player.getServerWorld().getStructureAccessor().getStructureAt(player.getBlockPos(), structure);
+        ServerWorld world = player.getServerWorld();
+        StructureStart start = world.getStructureAccessor().getStructureAt(player.getBlockPos(), structure);
         HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
+
+        if(!((ControlsStructureTick) world).canTickStructure(start)){
+            return;
+        }
 
         if(startWithRestrictions.hasActiveRestrictions()){
             if(startWithRestrictions.getStructureRestrictionInstance() == null){
-                if(!startWithRestrictions.createStructureRestrictionInstance(player.getServerWorld().getRegistryManager())){
+                if(!startWithRestrictions.createStructureRestrictionInstance(world.getRegistryManager())){
                     return;
                 }
             }
 
-            Identifier id = player.getServerWorld().getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
+            Identifier id = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure);
             if(id != null){
                 ServerRestrictionsHelper.onStructureTick(player, start, startWithRestrictions.getStructureRestrictionInstance(), id);
             }
