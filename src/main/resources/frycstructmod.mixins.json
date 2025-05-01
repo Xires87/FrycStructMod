@@ -5,8 +5,9 @@
 	"mixins": [
 		"StructureStartMixin",
 		"PlayerManagerMixin",
-		"StatusEffectMixin",
 		"ServerWorldMixin",
+		"effect/StatusEffectMixin",
+		"effect/StatusEffectInstanceMixin",
 		"block/BlockMixin",
 		"block/FireBlockMixin",
 		"item/BlockItemMixin",

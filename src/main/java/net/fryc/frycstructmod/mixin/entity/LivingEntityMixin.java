@@ -77,7 +77,6 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
 
     @Inject(method = "canHaveStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;)Z", at = @At("HEAD"), cancellable = true)
     private void makeEntitiesImmune(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> ret) {
-        // TODO zrobic persistent effecty
         //this method is also executed on client, so client returns wrong values (nothing bad happened, at least not yet. but it would be better to have it fixed somehow)
         if(!this.getWorld().isClient()){
             Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", ((LivingEntity) (Object) this));

@@ -1,4 +1,4 @@
-package net.fryc.frycstructmod.mixin;
+package net.fryc.frycstructmod.mixin.effect;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

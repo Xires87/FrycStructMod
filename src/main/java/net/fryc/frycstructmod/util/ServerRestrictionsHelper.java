@@ -11,13 +11,11 @@ import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestri
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
-import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
-import net.fryc.frycstructmod.util.interfaces.ControlsStructureTick;
-import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
-import net.fryc.frycstructmod.util.interfaces.HoldsStructureStart;
+import net.fryc.frycstructmod.util.interfaces.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -33,8 +31,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.gen.structure.Structure;
+import org.jetbrains.annotations.Nullable;
 import oshi.util.tuples.Quartet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,7 +70,7 @@ public class ServerRestrictionsHelper {
             ServerPlayNetworking.send(pl, ModPackets.SPAWN_SOUL_PARTICLES, buf);
         }
     }
-
+// TODO wylaczanie restrykcji persistent entity nie synchronizuje z klientem
     public static void checkForPersistentEntitiesFromSource(StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
         if(restrictionInstance != null){
             for(AbstractStructureRestriction restriction : restrictionInstance.getStructureRestrictions()){
@@ -193,11 +193,15 @@ public class ServerRestrictionsHelper {
                             int dur = triplet.getC() > 0 ? triplet.getC() : -1;
                             Quartet<Boolean, Boolean, Boolean, Boolean> quartet = triplet.getA();
                             if(quartet.getA()){
-                                player.addStatusEffect(new StatusEffectInstance(effect, dur, amp, quartet.getB(), quartet.getC(), quartet.getD()));
+                                StatusEffectInstance instance = new StatusEffectInstance(effect, dur, amp, quartet.getB(), quartet.getC(), quartet.getD());
+                                ((StructureStatusEffect) instance).setFromStructure(true);
+                                player.addStatusEffect(instance);
                             }
                             else {
                                 nonPlayerLivingEntities.forEach(entity -> {
-                                    ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(effect, dur, amp, quartet.getB(), quartet.getC(), quartet.getD()));
+                                    StatusEffectInstance instance = new StatusEffectInstance(effect, dur, amp, quartet.getB(), quartet.getC(), quartet.getD());
+                                    ((StructureStatusEffect) instance).setFromStructure(true);
+                                    ((LivingEntity) entity).addStatusEffect(instance);
                                 });
                             }
                         });
@@ -208,7 +212,32 @@ public class ServerRestrictionsHelper {
     }
 
     public static void onStructureLeave(PlayerEntity player){
-        // TODO zrobic usuwanie persistent effectow
+        List<StatusEffect> structureEffects = new ArrayList<>();
+        player.getActiveStatusEffects().forEach((effect, instance) -> {
+            if(((StructureStatusEffect) instance).isFromStructure()){
+                structureEffects.add(effect);
+            }
+            else {
+                tryToRemoveHiddenEffect(instance);
+            }
+        });
+
+        structureEffects.forEach(player::removeStatusEffect);
+    }
+
+    private static void tryToRemoveHiddenEffect(@Nullable StatusEffectInstance instance){
+        if(instance != null){
+            StatusEffectInstance hiddenEffect = ((StructureStatusEffect) instance).getHiddenEffect();
+            if(hiddenEffect != null){
+                if(((StructureStatusEffect) hiddenEffect).isFromStructure()){
+                    ((StructureStatusEffect) instance).setHiddenEffect(((StructureStatusEffect) hiddenEffect).getHiddenEffect());
+                    tryToRemoveHiddenEffect(instance);
+                }
+                else {
+                    tryToRemoveHiddenEffect(hiddenEffect);
+                }
+            }
+        }
     }
 
     public static void resetCurrentStructureWhenNeeded(PlayerEntity player){

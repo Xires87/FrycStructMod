@@ -26,12 +26,6 @@
         "strength": 1
       },
       {
-        "type": "persistentMobKill",
-        "entry_id": "minecraft:villager",
-        "strength": 1,
-        "forcePersistent": false
-      },
-      {
         "type": "blockBreak",
         "entry_id": "minecraft:oak_log",
         "strength": 1
