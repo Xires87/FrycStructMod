@@ -53,22 +53,25 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
     @Inject(method = "onDeath(Lnet/minecraft/entity/damage/DamageSource;)V", at = @At("HEAD"))
     private void onPersistentMobDeath(DamageSource source, CallbackInfo info) {
         if(!this.getWorld().isClient()){
-            if(((LivingEntity)(Object)this) instanceof MobEntity mob){
-                if(mob.isPersistent() || mob.cannotDespawn()){
-                    if(mob.getPrimeAdversary() == null || !mob.getPrimeAdversary().isPlayer()){
-                        ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) mob.getWorld()), mob.getBlockPos(), structure -> {
+            if(this.isAffectedByStructure()){
+                if(((LivingEntity)(Object)this) instanceof MobEntity mob){
+                    if(mob.isPersistent() || mob.cannotDespawn()){
+                        if(mob.getPrimeAdversary() == null || !mob.getPrimeAdversary().isPlayer()){
+                            ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) mob.getWorld()), mob.getBlockPos(), structure -> {
 
-                            StructureStart start = ((ServerWorld) mob.getWorld()).getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
-                            HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
+                                StructureStart start = ((ServerWorld) mob.getWorld()).getStructureAccessor().getStructureAt(this.getBlockPos(), structure);
+                                HasRestrictions startWithRestrictions = ((HasRestrictions) (Object) start);
 
-                            if(startWithRestrictions.hasActiveRestrictions()){
-                                ServerRestrictionsHelper.checkForPersistentEntitiesFromSource(
-                                        startWithRestrictions.getStructureRestrictionInstance(),
-                                        ((ServerWorld) mob.getWorld()),
-                                        start
-                                );
-                            }
-                        });
+                                if(startWithRestrictions.hasActiveRestrictions()){
+                                    ServerRestrictionsHelper.checkForPersistentEntitiesFromAllSourcesAndUpdate(
+                                            mob,
+                                            startWithRestrictions.getStructureRestrictionInstance(),
+                                            ((ServerWorld) mob.getWorld()),
+                                            start
+                                    );
+                                }
+                            });
+                        }
                     }
                 }
             }

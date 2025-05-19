@@ -47,8 +47,18 @@ public class StructureRestrictionInstance {
         });
     }
 
+    /**
+     *  Disabling shared restriction disables all other shared restrictions
+     */
     public void disableRestriction(AbstractStructureRestriction restriction){
-        this.getDisabledRestrictions().add(restriction);
+        if(restriction.getRestrictionSource().isShared()){
+            this.setCurrentSharedPower(0);
+            this.updateDisabledRestrictions();
+        }
+        else {
+            this.getCurrentSeperatePowers().put(restriction, 0);
+            this.getDisabledRestrictions().add(restriction);
+        }
     }
 
     private boolean shouldDisableRestriction(AbstractStructureRestriction restriction){

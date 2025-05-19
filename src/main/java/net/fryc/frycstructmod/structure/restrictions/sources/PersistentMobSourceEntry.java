@@ -1,15 +1,17 @@
 package net.fryc.frycstructmod.structure.restrictions.sources;
 
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
-import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
-import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
+import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.util.Identifier;
+
+import java.util.Optional;
 
 public class PersistentMobSourceEntry extends LivingEntitySourceEntry {
 
@@ -26,21 +28,16 @@ public class PersistentMobSourceEntry extends LivingEntitySourceEntry {
         if(source instanceof MobEntity mob){
             if(!this.shouldForcePersistent() || (mob.isPersistent() || mob.cannotDespawn())){
                 if(super.affectOwner(structureStart, source, player)){
-                    StructureRestrictionInstance instance = ((HasRestrictions) (Object) structureStart).getStructureRestrictionInstance();
-                    if(!this.shouldCheckForOtherPersistentEntities()){
-                        if(!RestrictionsHelper.findPersistentMob(mob.getWorld(), structureStart.getBoundingBox(), mob.getType(), this.shouldForcePersistent())){
-                            instance.updateDisabledRestrictions();
-                            ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(structureStart, instance);
+                    Optional<StructureRestrictionInstance> optional = ServerRestrictionsHelper.getStructureRestrictionInstance(structureStart);
+                    if(optional.isPresent()){
+                        StructureRestrictionInstance instance = optional.get();
+                        if(this.owner.isShared()){
+                            this.checkAndUpdateSharedRestrictions(instance, structureStart, ((ServerWorld) source.getWorld()), source.getType());
+                        }
+                        else {
+                            this.checkAndUpdateSeparateRestrictions(instance, structureStart, ((ServerWorld) source.getWorld()), source.getType());
                         }
                     }
-                    else if(!source.getWorld().isClient()){
-                        ServerRestrictionsHelper.checkForPersistentEntitiesFromSource(
-                                instance,
-                                ((ServerWorld) source.getWorld()),
-                                structureStart
-                        );
-                    }
-
 
                     return true;
                 }
@@ -57,6 +54,34 @@ public class PersistentMobSourceEntry extends LivingEntitySourceEntry {
 
     public boolean shouldCheckForOtherPersistentEntities(){
         return this.checkForOtherPersistentEntities;
+    }
+
+    public void checkAndUpdateSharedRestrictions(StructureRestrictionInstance instance, StructureStart structureStart, ServerWorld world, EntityType<?> entityType){
+        if(this.shouldCheckForOtherPersistentEntities()){
+            ServerRestrictionsHelper.checkForPersistentEntitiesFromSharedSourceAndUpdate(instance, world, structureStart);
+        }
+        else {
+            if(!RestrictionsHelper.findPersistentMob(world, structureStart.getBoundingBox(), entityType, this.shouldForcePersistent())){
+                instance.getActiveRestrictions().stream().filter(restriction -> {
+                    return restriction.getRestrictionSource().isShared();
+                }).toList().forEach(instance::disableRestriction);
+            }
+        }
+    }
+
+    public void checkAndUpdateSeparateRestrictions(StructureRestrictionInstance instance, StructureStart structureStart, ServerWorld world, EntityType<?> entityType){
+        if(this.shouldCheckForOtherPersistentEntities()){
+            ServerRestrictionsHelper.checkForPersistentEntitiesFromSeparateSourceAndUpdate(this.owner, instance, world, structureStart);
+        }
+        else {
+            if(!RestrictionsHelper.findPersistentMob(world, structureStart.getBoundingBox(), entityType, this.shouldForcePersistent())){
+                RestrictionsHelper.getRestrictionBySource(instance.getActiveRestrictions(), this).ifPresent(instance::disableRestriction);
+            }
+        }
+    }
+
+    public static boolean isOwnerShared(PersistentMobSourceEntry entry){
+        return entry.owner.isShared();
     }
 
 }

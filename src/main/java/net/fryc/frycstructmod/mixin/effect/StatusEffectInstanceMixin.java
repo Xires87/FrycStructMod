@@ -15,7 +15,7 @@ abstract class StatusEffectInstanceMixin implements StructureStatusEffect {
     @Shadow
     @Nullable
     private StatusEffectInstance hiddenEffect;
-
+// TODO musze to do nbt zapisywac bo jak wyjde to zostaje efekt na zawsze
     public boolean fromStructure = false;
 
     public boolean isFromStructure() {

@@ -9,17 +9,22 @@ import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
+import net.fryc.frycstructmod.structure.restrictions.sources.AbstractSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
+import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
+import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.interfaces.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -59,6 +64,12 @@ public class ServerRestrictionsHelper {
         ServerPlayNetworking.send(((ServerPlayerEntity) player), ModPackets.AFFECT_BY_STRUCTURE, buf);
     }
 
+    public static void sendRestrictionUpdatesToClient(StructureRestrictionInstance restrictionInstance, StructureStart start, ServerWorld world, String structureId){
+        ((PlayerLocator)(Object) start).getPlayersInStructure(world).forEach(pl -> {
+            ServerRestrictionsHelper.setAffectedByStructureServerAndClient(pl, structureId, restrictionInstance);
+        });
+    }
+
     public static Optional<StructureRestrictionInstance> getStructureRestrictionInstance(StructureStart start){
         return Optional.ofNullable(((HasRestrictions)(Object) start).getStructureRestrictionInstance());
     }
@@ -70,27 +81,102 @@ public class ServerRestrictionsHelper {
             ServerPlayNetworking.send(pl, ModPackets.SPAWN_SOUL_PARTICLES, buf);
         }
     }
-// TODO wylaczanie restrykcji persistent entity nie synchronizuje z klientem
-    public static void checkForPersistentEntitiesFromSource(StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
+
+    public static void checkForPersistentEntitiesFromAllSourcesAndUpdate(MobEntity mob, StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
         if(restrictionInstance != null){
-            for(AbstractStructureRestriction restriction : restrictionInstance.getStructureRestrictions()){
+            restrictionInstance.getActiveRestrictions().forEach(restriction -> {
+                restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
+                    return entry.getEvent().equals(SourceEntryEvent.ON_MOB_KILL) &&
+                            entry instanceof PersistentMobSourceEntry &&
+                            Registries.ENTITY_TYPE.getId(mob.getType()).equals(((AbstractSourceEntry<?>) entry).getSourceId());
+                }).forEach(entry -> {
+                    PersistentMobSourceEntry mobEntry = (PersistentMobSourceEntry) entry;
+                    if(PersistentMobSourceEntry.isOwnerShared(mobEntry)){
+                        mobEntry.checkAndUpdateSharedRestrictions(restrictionInstance, start, world, mob.getType());
+                    }
+                    else {
+                        mobEntry.checkAndUpdateSeparateRestrictions(restrictionInstance, start, world, mob.getType());
+                    }
+                });
+            });
+        }
+    }
+
+    public static void checkForPersistentEntitiesFromAllSourcesAndUpdate(StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
+        if(restrictionInstance != null){
+            restrictionInstance.getActiveRestrictions().forEach(restriction -> {
+                restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
+                    return entry.getEvent().equals(SourceEntryEvent.ON_MOB_KILL) && entry instanceof PersistentMobSourceEntry;
+                }).forEach(entry -> {
+                    PersistentMobSourceEntry mobEntry = (PersistentMobSourceEntry) entry;
+                    if(PersistentMobSourceEntry.isOwnerShared(mobEntry)){
+                        mobEntry.checkAndUpdateSharedRestrictions(restrictionInstance, start, world, Registries.ENTITY_TYPE.get(mobEntry.getSourceId()));
+                    }
+                    else {
+                        mobEntry.checkAndUpdateSeparateRestrictions(restrictionInstance, start, world, Registries.ENTITY_TYPE.get(mobEntry.getSourceId()));
+                    }
+                });
+            });
+        }
+    }
+
+    public static void checkForPersistentEntitiesFromSeparateSourceAndUpdate(RestrictionSource source, StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
+        if(restrictionInstance != null){
+            List<SourceEntry<?>> list = source.getEntries().stream().filter(entry -> {
+                return entry instanceof PersistentMobSourceEntry;
+            }).toList();
+
+            boolean shouldDisable = !list.isEmpty();
+            for(SourceEntry<?> entry : list){
+                Optional<EntityType<?>> type = EntityType.get(((PersistentMobSourceEntry) entry).getSourceId().toString());
+                if(type.isPresent()){
+                    if(RestrictionsHelper.findPersistentMob(world, start.getBoundingBox(), type.get(), ((PersistentMobSourceEntry) entry).shouldForcePersistent())){
+                        shouldDisable = false;
+                        break;
+                    }
+                }
+            }
+
+            if(shouldDisable){
+                restrictionInstance.getActiveRestrictions().stream().filter(restriction -> {
+                    return restriction.getRestrictionSource().equals(source);
+                }).forEach(restrictionInstance::disableRestriction);
+
+                sendRestrictionUpdatesToClient(restrictionInstance, start, world, restrictionInstance.getStructureId());
+            }
+
+            tryToRemoveRestrictionsFromStructure(start, restrictionInstance);
+        }
+    }
+
+    public static void checkForPersistentEntitiesFromSharedSourceAndUpdate(StructureRestrictionInstance restrictionInstance, ServerWorld world, StructureStart start){
+        if(restrictionInstance != null){
+            List<AbstractStructureRestriction> activeShared = restrictionInstance.getActiveRestrictions().stream().filter(restriction -> {
+                return restriction.getRestrictionSource().isShared();
+            }).toList();
+
+            boolean shouldDisable = !activeShared.isEmpty();
+            LABEL:
+            for(AbstractStructureRestriction restriction : activeShared){
                 List<SourceEntry<?>> list = restriction.getRestrictionSource().getEntries().stream().filter(entry -> {
                     return entry instanceof PersistentMobSourceEntry;
                 }).toList();
-                boolean shouldDisable = !list.isEmpty();
+
                 for(SourceEntry<?> entry : list){
                     Optional<EntityType<?>> type = EntityType.get(((PersistentMobSourceEntry) entry).getSourceId().toString());
                     if(type.isPresent()){
                         if(RestrictionsHelper.findPersistentMob(world, start.getBoundingBox(), type.get(), ((PersistentMobSourceEntry) entry).shouldForcePersistent())){
                             shouldDisable = false;
-                            break;
+                            break LABEL;
                         }
                     }
                 }
+            }
 
-                if(shouldDisable){
-                    restrictionInstance.disableRestriction(restriction);
-                }
+            if(shouldDisable){
+                // disabling one shared restriction disables others, so there is no need to iterate
+                activeShared.stream().findFirst().ifPresent(restrictionInstance::disableRestriction);
+                sendRestrictionUpdatesToClient(restrictionInstance, start, world, restrictionInstance.getStructureId());
             }
 
             tryToRemoveRestrictionsFromStructure(start, restrictionInstance);
@@ -182,7 +268,7 @@ public class ServerRestrictionsHelper {
             player.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
 
             // checks for persistent entities on enter in case they somehow died (without player's help)
-            ServerRestrictionsHelper.checkForPersistentEntitiesFromSource(restrictionInstance, player.getServerWorld(), start);
+            ServerRestrictionsHelper.checkForPersistentEntitiesFromAllSourcesAndUpdate(restrictionInstance, player.getServerWorld(), start);
 
             // TODO odpalic eventy zamiast tego
             RestrictionsHelper.getRestrictionByType("status_effect", structureId).ifPresent(restriction -> {

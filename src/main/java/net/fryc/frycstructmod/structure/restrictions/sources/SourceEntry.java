@@ -20,9 +20,7 @@ public interface SourceEntry<T> {
         boolean retValue = this.affectOwner(structureStart, source, player);
         if(retValue){
             ServerRestrictionsHelper.getStructureRestrictionInstance(structureStart).ifPresent(instance -> {
-                ((PlayerLocator)(Object) structureStart).getPlayersInStructure(world).forEach(pl -> {
-                    ServerRestrictionsHelper.setAffectedByStructureServerAndClient(pl, ((CanBeAffectedByStructure) player).getStructureId(), instance);
-                });
+                ServerRestrictionsHelper.sendRestrictionUpdatesToClient(instance, structureStart, world, instance.getStructureId());
             });
 
             world.getChunk(structureStart.getPos().x, structureStart.getPos().z).setNeedsSaving(true);
