@@ -2,13 +2,14 @@ package net.fryc.frycstructmod.structure.restrictions;
 
 import com.google.common.collect.ImmutableSet;
 import net.fryc.frycstructmod.FrycStructMod;
+import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
 import net.fryc.frycstructmod.structure.restrictions.sources.SourceEntry;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 
 import java.util.*;
 
 public class StructureRestrictionInstance {
-// TODO jesli shared to trzeba okreslic czy nalezy dodawac te wartosci czy jak
+
     private final Set<AbstractStructureRestriction> structureRestrictions;
     private int currentSharedPower;
     private final String structureId;
@@ -130,8 +131,9 @@ public class StructureRestrictionInstance {
     private static int calculateSharedPower(Set<AbstractStructureRestriction> structureRestrictions){
         int i = 0;
         for(AbstractStructureRestriction restriction : structureRestrictions){
-            if(restriction.getRestrictionSource().isShared()){
-                i += restriction.getRestrictionSource().getPower();
+            RestrictionSource source = restriction.getRestrictionSource();
+            if(source.isShared()){
+                i = source.getShareOperation().applyOperation(i, source.getPower());
             }
         }
 

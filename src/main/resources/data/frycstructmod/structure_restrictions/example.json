@@ -18,6 +18,7 @@
   },
   "source": {
     "shared": true,
+    "shareOperation": "add",
     "power": 10,
     "entries": [
       {
