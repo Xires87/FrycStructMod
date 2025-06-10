@@ -22,7 +22,7 @@ public class PersistentMobSourceEntry extends LivingEntitySourceEntry {
         this.forcePersistent = forcePersistent;
         this.checkForOtherPersistentEntities = checkForOtherPersistentEntities;
     }
-// TODO naprawic persistent entity (checkForOtherPersistentEntities powinno patrzec tylko na SWOJE sourcey jak jest separate albo na wsystkie SHARED sourcey jak shared jest)
+
     @Override
     public boolean affectOwner(StructureStart structureStart, LivingEntity source, PlayerEntity player) {
         if(source instanceof MobEntity mob){
@@ -65,6 +65,8 @@ public class PersistentMobSourceEntry extends LivingEntitySourceEntry {
                 instance.getActiveRestrictions().stream().filter(restriction -> {
                     return restriction.getRestrictionSource().isShared();
                 }).toList().forEach(instance::disableRestriction);
+
+                ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(structureStart, instance);
             }
         }
     }

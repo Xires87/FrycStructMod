@@ -17,7 +17,7 @@
     "always_disallow_when_indestructible": true
   },
   "source": {
-    "shared": false,
+    "shared": true,
     "power": 10,
     "entries": [
       {

@@ -40,6 +40,13 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements CanBeAffe
         }
     }
 
+    @Inject(method = "onDisconnect()V", at = @At("HEAD"))
+    private void leaveStructureOnDisconnect(CallbackInfo info) {
+        if(this.isAffectedByStructure()){
+            ServerRestrictionsHelper.onStructureLeave(this);
+        }
+    }
+
 
     public @Nullable StructureStart getStructureStart(){
         return this.currentStructure;

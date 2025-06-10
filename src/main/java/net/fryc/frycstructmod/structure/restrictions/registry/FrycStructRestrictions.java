@@ -16,7 +16,6 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
-import oshi.util.tuples.Pair;
 import oshi.util.tuples.Quartet;
 import oshi.util.tuples.Triplet;
 

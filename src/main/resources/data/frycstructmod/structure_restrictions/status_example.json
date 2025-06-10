@@ -26,13 +26,19 @@
     }
   ],
   "source": {
-    "shared": false,
+    "shared": true,
     "power": 10,
     "entries": [
       {
         "type": "itemUseFinish",
         "entry_id": "minecraft:cooked_porkchop",
         "strength": 5
+      },
+      {
+        "type": "persistentMobKill",
+        "entry_id": "minecraft:villager",
+        "strength": 1,
+        "forcePersistent": false
       }
     ]
   }
