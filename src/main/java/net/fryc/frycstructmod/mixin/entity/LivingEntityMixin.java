@@ -1,10 +1,14 @@
 package net.fryc.frycstructmod.mixin.entity;
 
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
+import net.fryc.frycstructmod.util.interfaces.CanHaveStatusEffect;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
 import net.minecraft.entity.Attackable;
 import net.minecraft.entity.Entity;
@@ -16,8 +20,12 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,7 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Mixin(LivingEntity.class)
-abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffectedByStructure {
+abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffectedByStructure, CanHaveStatusEffect {
 
     private String affectedByStructure = "";
 
@@ -115,22 +123,14 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
                                 if(effectRestriction.shouldHideStatusEffect(this, entry.getKey())) {
                                     StatusEffectInstance removedEffect = entry.getValue();
                                     this.addStatusEffectToInactiveEffects(removedEffect);
-                                    iterator.remove();// TODO networkingiem wysylac info o efektach i wyswietlac nieaktywne efekty (takie przezroczyste bym dal i moze X na ich ikonkach)
+                                    iterator.remove();
                                     this.onStatusEffectRemoved(removedEffect);
                                 }
                             }
                         }
-                    }, (start, restrictionInstance) -> {
-                        this.inactiveStatusEffects.entrySet().removeIf(statusEffectStatusEffectInstanceEntry -> {
-                            return dys.addStatusEffect(statusEffectStatusEffectInstanceEntry.getValue());
-                        });
-                    });
+                    }, (start, restrictionInstance) -> this.removeStatusEffectsFromInactiveEffects());
                 });
-            }, () -> {
-                this.inactiveStatusEffects.entrySet().removeIf(statusEffectStatusEffectInstanceEntry -> {
-                    return dys.addStatusEffect(statusEffectStatusEffectInstanceEntry.getValue());
-                });
-            });
+            }, this::removeStatusEffectsFromInactiveEffects);
         }
     }
 
@@ -174,13 +174,49 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
         return this.affectedByStructure;
     }
 
-    private void addStatusEffectToInactiveEffects(StatusEffectInstance effect){
+    public HashMap<StatusEffect, StatusEffectInstance> getInactiveStatusEffects(){
+        return this.inactiveStatusEffects;
+    }
+
+    public void addStatusEffectToInactiveEffects(StatusEffectInstance effect){
+        if(!this.getWorld().isClient()){
+            if(((LivingEntity)(Object)this) instanceof ServerPlayerEntity player){
+                Identifier id = Registries.STATUS_EFFECT.getId(effect.getEffectType());
+                if(id != null){
+                    PacketByteBuf buf = PacketByteBufs.create();
+                    buf.writeIdentifier(id);
+                    buf.writeInt(effect.getDuration());
+                    buf.writeInt(effect.getAmplifier());
+                    buf.writeBoolean(effect.shouldShowIcon());
+                    ServerPlayNetworking.send(player, ModPackets.ADD_INACTIVE_STATUS_EFFECT, buf);
+                }
+            }
+        }
+
         if(!this.inactiveStatusEffects.containsKey(effect.getEffectType())){
             this.inactiveStatusEffects.put(effect.getEffectType(), effect);
         }
         else {
             this.inactiveStatusEffects.get(effect.getEffectType()).upgrade(effect);
         }
+    }
+
+    public void removeStatusEffectsFromInactiveEffects(){
+        this.inactiveStatusEffects.entrySet().removeIf(statusEffectStatusEffectInstanceEntry -> {
+            LivingEntity dys = ((LivingEntity)(Object)this);
+            boolean bl = dys.addStatusEffect(statusEffectStatusEffectInstanceEntry.getValue());
+            if(bl){
+                if(dys instanceof ServerPlayerEntity player){
+                    Identifier id = Registries.STATUS_EFFECT.getId(statusEffectStatusEffectInstanceEntry.getKey());
+                    if(id != null){
+                        PacketByteBuf buf = PacketByteBufs.create();
+                        buf.writeIdentifier(id);
+                        ServerPlayNetworking.send(player, ModPackets.REMOVE_INACTIVE_STATUS_EFFECT, buf);
+                    }
+                }
+            }
+            return bl;
+        });
     }
 
 }

@@ -20,7 +20,8 @@
 		"explosion/EntityExplosionBehaviorMixin"
 	],
 	"client": [
-		"client/ClientPlayerEntityMixin"
+		"client/ClientPlayerEntityMixin",
+		"client/AbstractInventoryScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

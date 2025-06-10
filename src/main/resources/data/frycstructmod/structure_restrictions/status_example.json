@@ -11,19 +11,12 @@
     "allowed": true,
     "except": [
       "minecraft:regeneration",
-      "minecraft:instant_damage"
+      "minecraft:instant_damage",
+      "minecraft:darkness"
     ]
   },
   "structure_effects": [
-    {
-      "id": "minecraft:slowness",
-      "amplifier": 1,
-      "duration": -1,
-      "forPlayer": true,
-      "ambient": false,
-      "showParticles": true,
-      "showIcon": true
-    }
+
   ],
   "source": {
     "shared": true,
