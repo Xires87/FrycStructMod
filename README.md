@@ -1,0 +1,3 @@
+# Structure Restrictions
+
+todo
