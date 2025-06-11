@@ -3,6 +3,7 @@ package net.fryc.frycstructmod.mixin.entity;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionTypes;
 import net.fryc.frycstructmod.structure.restrictions.sources.events.SourceEntryEvent;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.minecraft.block.BlockState;
@@ -29,7 +30,7 @@ abstract class PlayerEntityMixin extends LivingEntity {
     @ModifyReturnValue(method = "getBlockBreakingSpeed(Lnet/minecraft/block/BlockState;)F", at = @At("RETURN"))
     private float modifyMiningSpeedWhenAffectedByStructure(float original, BlockState block) {
         // executed on both client and server
-        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("default", this);
+        Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure(RestrictionTypes.DEFAULT, this);
         if(optional.isPresent()){
             PlayerEntity dys = ((PlayerEntity) (Object) this);
             if(RestrictionsHelper.shouldPlayerBeAffectedByRestriction(optional.get(), dys)){

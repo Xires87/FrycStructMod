@@ -1,6 +1,7 @@
 package net.fryc.frycstructmod.mixin.explosion;
 
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionTypes;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.HasRestrictions;
@@ -36,7 +37,7 @@ abstract class ExplosionBehaviorMixin {
             if(start != null){
                 if(((HasRestrictions) (Object) start).hasActiveRestrictions()){
                     RestrictionsHelper.getRestrictionByType(
-                            "explosion", serverWorld.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(start.getStructure())
+                            RestrictionTypes.EXPLOSION, serverWorld.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(start.getStructure())
                     ).ifPresent(restriction -> {
                         Optional<StructureRestrictionInstance> opt = ServerRestrictionsHelper.getStructureRestrictionInstance(start);
                         opt.ifPresent(restrictionInstance -> {

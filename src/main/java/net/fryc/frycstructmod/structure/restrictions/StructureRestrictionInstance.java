@@ -104,6 +104,26 @@ public class StructureRestrictionInstance {
         return set;
     }
 
+    public String getWelcomeMessage(){
+        for(AbstractStructureRestriction res : this.getStructureRestrictions()){
+            if(!res.getWelcomeMessage().isEmpty()){
+                return res.getWelcomeMessage();
+            }
+        }
+
+        return "";
+    }
+
+    public String getLeaveMessage(){
+        for(AbstractStructureRestriction res : this.getStructureRestrictions()){
+            if(!res.getLeaveMessage().isEmpty()){
+                return res.getLeaveMessage();
+            }
+        }
+
+        return "";
+    }
+
     public Set<AbstractStructureRestriction> getStructureRestrictions(){
         return this.structureRestrictions;
     }

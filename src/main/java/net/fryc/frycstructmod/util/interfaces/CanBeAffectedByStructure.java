@@ -11,4 +11,8 @@ public interface CanBeAffectedByStructure {
 
     String getStructureId();
 
+    void setLeaveMessage(String message);
+
+    String getLeaveMessage();
+
 }

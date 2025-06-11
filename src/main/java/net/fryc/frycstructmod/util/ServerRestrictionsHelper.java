@@ -9,6 +9,7 @@ import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StructureRestrictionInstance;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionTypes;
 import net.fryc.frycstructmod.structure.restrictions.sources.AbstractSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.PersistentMobSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
@@ -265,13 +266,14 @@ public class ServerRestrictionsHelper {
         if(!ServerRestrictionsHelper.tryToRemoveRestrictionsFromStructure(start, restrictionInstance)){
             ((HoldsStructureStart) player).setStructureStart(start);
             ServerRestrictionsHelper.setAffectedByStructureServerAndClient(player, structureId.toString(), restrictionInstance);
-            player.sendMessage(Text.of("Weszlem do struktury"));// TODO jakies FAJNE powiadomienie ze jestes na terenie struktury
+
+            ServerRestrictionsHelper.setAndSendRestrictionMessages(player, restrictionInstance);
 
             // checks for persistent entities on enter in case they somehow died (without player's help)
             ServerRestrictionsHelper.checkForPersistentEntitiesFromAllSourcesAndUpdate(restrictionInstance, player.getServerWorld(), start);
 
             // TODO odpalic eventy zamiast tego
-            RestrictionsHelper.getRestrictionByType("status_effect", structureId).ifPresent(restriction -> {
+            RestrictionsHelper.getRestrictionByType(RestrictionTypes.STATUS_EFFECT, structureId).ifPresent(restriction -> {
                 if(!((HasRestrictions)(Object) start).getStructureRestrictionInstance().isRestrictionDisabled(restriction)){
                     if(restriction instanceof StatusEffectStructureRestriction statusRes){
                         statusRes.getPersistentEffects().forEach((effect, triplet) -> {
@@ -330,11 +332,24 @@ public class ServerRestrictionsHelper {
         HoldsStructureStart structureGetter = ((HoldsStructureStart) player);
         if(structureGetter.getStructureStart() != null){
             player.getWorld().getChunk(structureGetter.getStructureStart().getPos().x, structureGetter.getStructureStart().getPos().z).setNeedsSaving(true);
-            player.sendMessage(Text.of("Wychodze"));
+
+            String mess = ((CanBeAffectedByStructure) player).getLeaveMessage();
+            if(!mess.isEmpty()){
+                player.sendMessage(Text.of(mess), true);
+            }
+
             structureGetter.setStructureStart(null);
             ServerRestrictionsHelper.setAffectedByStructureServerAndClient(player, "", null);
             ServerRestrictionsHelper.onStructureLeave(player);
         }
+    }
+
+    public static void setAndSendRestrictionMessages(PlayerEntity player, StructureRestrictionInstance resInstance){
+        String mess = resInstance.getWelcomeMessage();
+        if(!mess.isEmpty()){
+            player.sendMessage(Text.of(mess), true);
+        }
+        ((CanBeAffectedByStructure) player).setLeaveMessage(resInstance.getLeaveMessage());
     }
 
     public static void onStructureStartLoadFromNbt(StructureStart start, StructureContext context, NbtCompound nbt, long seed){

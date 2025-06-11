@@ -21,11 +21,11 @@ public class DefaultStructureRestriction extends AbstractStructureRestriction {
     private final Set<Block> placingExcludedBlocks;
     private final float miningSpeedMultiplier;
 
-    public DefaultStructureRestriction(String structureId, boolean allowMining, boolean allowMiningPlayerBlocks, float miningSpeedMultiplier,
+    public DefaultStructureRestriction(String structureId, String welcomeMessage, String leaveMessage, boolean allowMining, boolean allowMiningPlayerBlocks, float miningSpeedMultiplier,
                                        Set<Block> miningExcludedBlocks, boolean allowPlacing, boolean alwaysDisallowPlacingIndestructibleBlocks,
                                        Set<Block> placingExcludedBlocks, RestrictionSource restrictionSource){
 
-        super(structureId, RestrictionTypes.DEFAULT, restrictionSource);
+        super(structureId, RestrictionTypes.DEFAULT, welcomeMessage, leaveMessage, restrictionSource);
         this.allowMining = allowMining;
         this.allowMiningPlayerBlocks = allowMiningPlayerBlocks;
         this.miningExcludedBlocks = miningExcludedBlocks;

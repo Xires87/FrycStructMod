@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fryc.frycstructmod.network.ModPackets;
 import net.fryc.frycstructmod.structure.restrictions.AbstractStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionTypes;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.fryc.frycstructmod.util.interfaces.CanBeAffectedByStructure;
@@ -44,6 +45,7 @@ import java.util.Optional;
 abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffectedByStructure, CanHaveStatusEffect {
 
     private String affectedByStructure = "";
+    private String leaveMessage = "";
 
     private final HashMap<StatusEffect, StatusEffectInstance> inactiveStatusEffects = new HashMap<>();
 
@@ -90,7 +92,7 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
     private void makeEntitiesImmune(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> ret) {
         //this method is also executed on client, so client returns wrong values (nothing bad happened, at least not yet. but it would be better to have it fixed somehow)
         if(!this.getWorld().isClient()){
-            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", ((LivingEntity) (Object) this));
+            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure(RestrictionTypes.STATUS_EFFECT, ((LivingEntity) (Object) this));
             optional.ifPresent(restriction -> {
                 ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
                     restriction.executeWhenEnabled(((ServerWorld) this.getWorld()), this.getBlockPos(), structure, (start, restrictionInstance) -> {
@@ -112,7 +114,7 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
     private void hideStatusEffects(CallbackInfo info){
         LivingEntity dys = ((LivingEntity) (Object)this);
         if(!this.getWorld().isClient()){
-            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure("status_effect", dys);
+            Optional<AbstractStructureRestriction> optional = RestrictionsHelper.getRestrictionByTypeIfEntityIsAffectedByStructure(RestrictionTypes.STATUS_EFFECT, dys);
             optional.ifPresentOrElse(restriction -> {
                 ServerRestrictionsHelper.executeIfHasStructure(((ServerWorld) this.getWorld()), this.getBlockPos(), structure -> {
                     restriction.executeWhenEnabledOrElse(((ServerWorld) this.getWorld()), this.getBlockPos(), structure, (start, restrictionInstance) -> {
@@ -199,6 +201,14 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBeAffe
         else {
             this.inactiveStatusEffects.get(effect.getEffectType()).upgrade(effect);
         }
+    }
+
+    public void setLeaveMessage(String message){
+        this.leaveMessage = message;
+    }
+
+    public String getLeaveMessage(){
+        return this.leaveMessage;
     }
 
     public void removeStatusEffectsFromInactiveEffects(){

@@ -10,8 +10,8 @@ public class FireStructureRestriction extends AbstractStructureRestriction {
     private final boolean doFireTick;
     private final float nonTickingFireRemoveChance;
 
-    public FireStructureRestriction(String structureId, boolean doFireTick, float nonTickingFireRemoveChance, RestrictionSource restrictionSource) {
-        super(structureId, RestrictionTypes.FIRE, restrictionSource);
+    public FireStructureRestriction(String structureId, String welcomeMessage, String leaveMessage, boolean doFireTick, float nonTickingFireRemoveChance, RestrictionSource restrictionSource) {
+        super(structureId, RestrictionTypes.FIRE, welcomeMessage, leaveMessage, restrictionSource);
         this.doFireTick =  doFireTick;
         this.nonTickingFireRemoveChance = nonTickingFireRemoveChance;
     }

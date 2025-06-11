@@ -1,6 +1,7 @@
 package net.fryc.frycstructmod.mixin.block;
 
 import net.fryc.frycstructmod.structure.restrictions.FireStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionTypes;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.minecraft.block.BlockState;
@@ -27,7 +28,7 @@ abstract class FireBlockMixin {
             ")V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;scheduleBlockTick(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V", shift = At.Shift.AFTER), cancellable = true)
     private void removeFireBlockTicksInStructures(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo info){
         ServerRestrictionsHelper.executeIfHasStructure(world, pos, structure -> {
-            RestrictionsHelper.getRestrictionByType("fire", world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure)).ifPresent(restriction -> {
+            RestrictionsHelper.getRestrictionByType(RestrictionTypes.FIRE, world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure)).ifPresent(restriction -> {
                 restriction.executeWhenEnabled(world, pos, structure, (start, restrictionInstance) -> {
                     if(!((FireStructureRestriction) restriction).shouldTickFire()){
                         if(((FireStructureRestriction) restriction).shouldRemoveFire(ThreadLocalRandom.current())){

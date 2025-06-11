@@ -17,10 +17,15 @@ public abstract class AbstractStructureRestriction {
     private final String restrictionType;
     private final RestrictionSource restrictionSource;
 
-    public AbstractStructureRestriction(String structureId, String restrictionType, RestrictionSource restrictionSource){
+    private final String welcomeMessage;
+    private final String leaveMessage;
+
+    public AbstractStructureRestriction(String structureId, String restrictionType, String welcomeMessage, String leaveMessage, RestrictionSource restrictionSource){
         this.structureId = structureId;
         this.restrictionType = restrictionType;
         this.restrictionSource = restrictionSource;
+        this.welcomeMessage = welcomeMessage;
+        this.leaveMessage = leaveMessage;
     }
 
     public void executeWhenEnabled(ServerWorld world, BlockPos pos, Structure structure, BiConsumer<StructureStart, StructureRestrictionInstance> consumer){
@@ -50,5 +55,13 @@ public abstract class AbstractStructureRestriction {
 
     public RestrictionSource getRestrictionSource(){
         return this.restrictionSource;
+    }
+
+    public String getWelcomeMessage(){
+        return this.welcomeMessage;
+    }
+
+    public String getLeaveMessage(){
+        return this.leaveMessage;
     }
 }

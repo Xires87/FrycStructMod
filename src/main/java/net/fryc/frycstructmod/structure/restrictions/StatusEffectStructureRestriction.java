@@ -22,11 +22,11 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
     private final Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> persistentEffects;
 
 
-    public StatusEffectStructureRestriction(String structureId, boolean affectAllEntities, Set<EntityType<?>> excludedEntities,
+    public StatusEffectStructureRestriction(String structureId, String welcomeMessage, String leaveMessage, boolean affectAllEntities, Set<EntityType<?>> excludedEntities,
                                             boolean allowAllEffects, Set<StatusEffect> excludedEffects,
                                             Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> persistentEffects, RestrictionSource restrictionSource) {
 
-        super(structureId, RestrictionTypes.STATUS_EFFECT, restrictionSource);
+        super(structureId, RestrictionTypes.STATUS_EFFECT, welcomeMessage, leaveMessage, restrictionSource);
         this.affectAllEntities = affectAllEntities;
         this.allowAllEffects = allowAllEffects;
         this.excludedEffects = excludedEffects;

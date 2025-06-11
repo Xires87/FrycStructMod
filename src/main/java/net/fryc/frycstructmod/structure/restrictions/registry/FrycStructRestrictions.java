@@ -28,6 +28,8 @@ public class FrycStructRestrictions {
     public static void registerRestrictionTypes(){
         RestrictionRegistries.registerRestrictionType(RestrictionTypes.DEFAULT, ((jsonObject, id) -> {
             String identifier = JsonHelper.getString(jsonObject, "structure_id");
+            String welcomeMessage = JsonHelper.getString(jsonObject, "welcome_message", "");
+            String leaveMessage = JsonHelper.getString(jsonObject, "leave_message", "");
             JsonObject miningObject = JsonHelper.getObject(jsonObject, "mining");
             JsonObject placingObject = JsonHelper.getObject(jsonObject, "placing");
             JsonArray mineExcept = JsonHelper.getArray(miningObject, "except", new JsonArray());
@@ -43,13 +45,15 @@ public class FrycStructRestrictions {
             ImmutableSet<Block> placingExceptions = FrycJsonHelper.getExcludedBlocks(placeExcept, id);
 
             RestrictionRegistries.registerStructureRestriction(identifier, RestrictionTypes.DEFAULT, new DefaultStructureRestriction(
-                    identifier, allowMining, allowMiningPlayerBlocks, miningSpeedMultiplier, miningExceptions, allowPlacing,
+                    identifier, welcomeMessage, leaveMessage, allowMining, allowMiningPlayerBlocks, miningSpeedMultiplier, miningExceptions, allowPlacing,
                     disallowPlacingIndestructibleBlocks, placingExceptions, FrycJsonHelper.createRestrictionSource(jsonObject, id)
             ));
         }));
 
         RestrictionRegistries.registerRestrictionType(RestrictionTypes.STATUS_EFFECT, ((jsonObject, id) -> {
             String identifier = JsonHelper.getString(jsonObject, "structure_id");
+            String welcomeMessage = JsonHelper.getString(jsonObject, "welcome_message", "");
+            String leaveMessage = JsonHelper.getString(jsonObject, "leave_message", "");
             JsonObject entitiesObject = JsonHelper.getObject(jsonObject, "entities_affected");
             JsonObject allowedEffectsObject = JsonHelper.getObject(jsonObject, "allowed_effects");
 
@@ -65,26 +69,30 @@ public class FrycStructRestrictions {
             Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> persistentEffectsMap = FrycJsonHelper.getPersistentEffectsMap(persistentEffectsArray, id);
 
             RestrictionRegistries.registerStructureRestriction(identifier, RestrictionTypes.STATUS_EFFECT, new StatusEffectStructureRestriction(
-                    identifier, affectAll, entityExceptions, allowEffects, allowedEffectExceptions,
+                    identifier, welcomeMessage, leaveMessage, affectAll, entityExceptions, allowEffects, allowedEffectExceptions,
                     persistentEffectsMap, FrycJsonHelper.createRestrictionSource(jsonObject, id)
             ));
         }));
 
         RestrictionRegistries.registerRestrictionType(RestrictionTypes.FIRE, ((jsonObject, id) -> {
             String identifier = JsonHelper.getString(jsonObject, "structure_id");
+            String welcomeMessage = JsonHelper.getString(jsonObject, "welcome_message", "");
+            String leaveMessage = JsonHelper.getString(jsonObject, "leave_message", "");
 
-            float removeChance = JsonHelper.getFloat(jsonObject, "nonTickingFireRemoveChance", 0.20f);
+            float removeChance = JsonHelper.getFloat(jsonObject, "non_ticking_fire_remove_chance", 0.20f);
 
             RestrictionRegistries.registerStructureRestriction(identifier, RestrictionTypes.FIRE, new FireStructureRestriction(
-                    identifier, false, removeChance, FrycJsonHelper.createRestrictionSource(jsonObject, id)
+                    identifier, welcomeMessage, leaveMessage, false, removeChance, FrycJsonHelper.createRestrictionSource(jsonObject, id)
             ));
         }));
 
         RestrictionRegistries.registerRestrictionType(RestrictionTypes.EXPLOSION, ((jsonObject, id) -> {
             String identifier = JsonHelper.getString(jsonObject, "structure_id");
+            String welcomeMessage = JsonHelper.getString(jsonObject, "welcome_message", "");
+            String leaveMessage = JsonHelper.getString(jsonObject, "leave_message", "");
 
             RestrictionRegistries.registerStructureRestriction(identifier, RestrictionTypes.EXPLOSION, new ExplosionStructureRestriction(
-                    identifier, FrycJsonHelper.createRestrictionSource(jsonObject, id)
+                    identifier, welcomeMessage, leaveMessage, FrycJsonHelper.createRestrictionSource(jsonObject, id)
             ));
         }));
     }
