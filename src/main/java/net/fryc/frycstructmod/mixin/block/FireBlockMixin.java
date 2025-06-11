@@ -1,5 +1,6 @@
 package net.fryc.frycstructmod.mixin.block;
 
+import net.fryc.frycstructmod.structure.restrictions.FireStructureRestriction;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
 import net.fryc.frycstructmod.util.ServerRestrictionsHelper;
 import net.minecraft.block.BlockState;
@@ -12,6 +13,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 @Mixin(FireBlock.class)
 abstract class FireBlockMixin {
@@ -26,9 +29,13 @@ abstract class FireBlockMixin {
         ServerRestrictionsHelper.executeIfHasStructure(world, pos, structure -> {
             RestrictionsHelper.getRestrictionByType("fire", world.getRegistryManager().get(RegistryKeys.STRUCTURE).getId(structure)).ifPresent(restriction -> {
                 restriction.executeWhenEnabled(world, pos, structure, (start, restrictionInstance) -> {
-                    info.cancel();// TODO sprawdzic tutaj czy na tym bloku nie powinno tickowac i wtedy cancelowac (i jeszcze dac opcje do usuwania ognia, ktory nie znika jak tickow nie ma)
+                    if(!((FireStructureRestriction) restriction).shouldTickFire()){
+                        if(((FireStructureRestriction) restriction).shouldRemoveFire(ThreadLocalRandom.current())){
+                            world.removeBlock(pos, false);
+                        }
 
-                    //world.removeBlock(pos, false); // TODO dac to jesli powinno usuwac ogien
+                        info.cancel();
+                    }
                 });
             });
         });

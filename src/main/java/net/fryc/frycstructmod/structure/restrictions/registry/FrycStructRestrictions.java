@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.fryc.frycstructmod.structure.restrictions.DefaultStructureRestriction;
+import net.fryc.frycstructmod.structure.restrictions.FireStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.StatusEffectStructureRestriction;
 import net.fryc.frycstructmod.structure.restrictions.sources.BlockStateSourceEntry;
 import net.fryc.frycstructmod.structure.restrictions.sources.ItemStackSourceEntry;
@@ -65,6 +66,16 @@ public class FrycStructRestrictions {
             RestrictionRegistries.registerStructureRestriction(identifier, "status_effect", new StatusEffectStructureRestriction(
                     identifier, affectAll, entityExceptions, allowEffects, allowedEffectExceptions,
                     persistentEffectsMap, FrycJsonHelper.createRestrictionSource(jsonObject, id)
+            ));
+        }));
+
+        RestrictionRegistries.registerRestrictionType("fire", ((jsonObject, id) -> {
+            String identifier = JsonHelper.getString(jsonObject, "structure_id");
+
+            float removeChance = JsonHelper.getFloat(jsonObject, "nonTickingFireRemoveChance", 0.20f);
+
+            RestrictionRegistries.registerStructureRestriction(identifier, "fire", new FireStructureRestriction(
+                    identifier, false, removeChance, FrycJsonHelper.createRestrictionSource(jsonObject, id)
             ));
         }));
     }
