@@ -1,5 +1,6 @@
 package net.fryc.frycstructmod.structure.restrictions;
 
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionTypes;
 import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -25,7 +26,7 @@ public class StatusEffectStructureRestriction extends AbstractStructureRestricti
                                             boolean allowAllEffects, Set<StatusEffect> excludedEffects,
                                             Map<StatusEffect, Triplet<Quartet<Boolean, Boolean, Boolean, Boolean>, Integer, Integer>> persistentEffects, RestrictionSource restrictionSource) {
 
-        super(structureId, "status_effect", restrictionSource);
+        super(structureId, RestrictionTypes.STATUS_EFFECT, restrictionSource);
         this.affectAllEntities = affectAllEntities;
         this.allowAllEffects = allowAllEffects;
         this.excludedEffects = excludedEffects;

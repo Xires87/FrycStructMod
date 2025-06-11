@@ -1,5 +1,6 @@
 package net.fryc.frycstructmod.structure.restrictions;
 
+import net.fryc.frycstructmod.structure.restrictions.registry.RestrictionTypes;
 import net.fryc.frycstructmod.structure.restrictions.sources.RestrictionSource;
 import net.fryc.frycstructmod.util.ModProperties;
 import net.fryc.frycstructmod.util.RestrictionsHelper;
@@ -24,7 +25,7 @@ public class DefaultStructureRestriction extends AbstractStructureRestriction {
                                        Set<Block> miningExcludedBlocks, boolean allowPlacing, boolean alwaysDisallowPlacingIndestructibleBlocks,
                                        Set<Block> placingExcludedBlocks, RestrictionSource restrictionSource){
 
-        super(structureId, "default", restrictionSource);
+        super(structureId, RestrictionTypes.DEFAULT, restrictionSource);
         this.allowMining = allowMining;
         this.allowMiningPlayerBlocks = allowMiningPlayerBlocks;
         this.miningExcludedBlocks = miningExcludedBlocks;

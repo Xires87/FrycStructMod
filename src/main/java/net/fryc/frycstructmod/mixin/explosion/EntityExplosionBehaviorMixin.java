@@ -41,7 +41,7 @@ abstract class EntityExplosionBehaviorMixin {
                         Optional<StructureRestrictionInstance> opt = ServerRestrictionsHelper.getStructureRestrictionInstance(start);
                         opt.ifPresent(restrictionInstance -> {
                             if(!restrictionInstance.isRestrictionDisabled(restriction)){
-                                ret.setReturnValue(false);// TODO zarejestrowac
+                                ret.setReturnValue(false);
                             }
                         });
                     });

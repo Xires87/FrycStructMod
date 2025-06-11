@@ -1,0 +1,9 @@
+{
+  "type": "explosion",
+  "structure_id": "minecraft:village_plains",
+  "source": {
+    "shared": true,
+    "power": 10,
+    "entries": []
+  }
+}
