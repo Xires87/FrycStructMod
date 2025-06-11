@@ -2,14 +2,15 @@
 	"schemaVersion": 1,
 	"id": "frycstructmod",
 	"version": "${version}",
-	"name": "FrycStructMod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Structure Restrictions",
+	"description": "Allows modification of some gameplay aspects within structures (f.e. mining/placing blocks) via datapacks",
 	"authors": [
-		"Xires87"
+		"Wookash Fryc"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://legacy.curseforge.com/minecraft/mc-mods/structure-restrictions",
+		"sources": "https://github.com/Xires87/FrycStructMod",
+		"issues": "https://github.com/Xires87/FrycStructMod/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/frycstructmod/icon.png",
